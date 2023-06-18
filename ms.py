@@ -64,6 +64,12 @@ st.markdown(hide_img_fs, unsafe_allow_html=True)
 #######################################
 #######################################
 
+def calculate_timedelta():
+    now = datetime.datetime.now()
+    seven_days = datetime.timedelta(days=7)
+    expiration = now + seven_days
+    return expiration
+
 def hex_to_rgb(hex_string):
     r_hex = hex_string[1:3]
     g_hex = hex_string[3:5]
@@ -288,11 +294,12 @@ def extract_pose_keypoints(video_path, fps, detectconfidence, trackconfidence, c
         video_name = file_out.name
         blob = bucket.blob(video_name)
         blob.upload_from_filename(video_name)
+        expiration = calculate_timedelta()
 
         # Get the URL of the uploaded video
         url = blob.generate_signed_url(
             version='v4',
-            expiration=timedelta(days=7),
+            expiration=expiration,
             method='GET'
         )
 
