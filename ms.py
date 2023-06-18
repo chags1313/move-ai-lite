@@ -11,7 +11,7 @@ import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore
 from firebase_admin import storage
-import datetime
+from datetime import datetime
 from datetime import timedelta
 
 
@@ -65,8 +65,8 @@ st.markdown(hide_img_fs, unsafe_allow_html=True)
 #######################################
 
 def calculate_timedelta():
-    now = datetime.datetime.now()
-    seven_days = datetime.timedelta(days=7)
+    now = datetime.now()
+    seven_days = timedelta(days=7)
     expiration = now + seven_days
     return expiration
 
