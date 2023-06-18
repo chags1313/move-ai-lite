@@ -104,9 +104,9 @@ def image_resize(image, width = None, height = None, inter = cv2.INTER_AREA):
 
 @st.cache_data(show_spinner="Analyzing video frames...")
 def extract_pose_keypoints(video_path, fps, detectconfidence, trackconfidence, color_discrete_map, textscale, textsize, angletextcolor, linesize, markersize):
-    cred = credentials.Certificate('path/to/serviceAccountKey.json')
+    cred = credentials.Certificate('move-ai-firebase-adminsdk-p4sb8-a1d9b38655.json')
     firebase_admin.initialize_app(cred, {
-        'storageBucket': '<your-storage-bucket>.appspot.com'
+        'storageBucket': 'gs://move-ai.appspot.com'
     })
     db = firestore.client()
     bucket = storage.bucket()
