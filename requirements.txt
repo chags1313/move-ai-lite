@@ -1,0 +1,6 @@
+streamlit
+mediapipe==0.9.0.1
+opencv-python-headless
+plotly
+pandas==1.4.1
+numpy
