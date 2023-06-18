@@ -285,7 +285,7 @@ def extract_pose_keypoints(video_path, fps, detectconfidence, trackconfidence, c
                     landmarks_dict[f'landmark_{idx}'] = [landmark.x, landmark.y, landmark.z, landmark.visibility]
 
             # Add the landmarks to Firestore
-            db.collection('pose_landmarks').add(landmarks_dict)
+            #db.collection('pose_landmarks').add(landmarks_dict)
 
 
 
