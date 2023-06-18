@@ -118,6 +118,11 @@ def extract_pose_keypoints(video_path, fps, detectconfidence, trackconfidence, c
     # Define mediapipe pose detection module
     mp_pose = mp.solutions.pose
     mp_drawing = mp.solutions.drawing_utils
+    # Convert the image list to a video
+    timestamp = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+    file_out = tempfile.NamedTemporaryFile(suffix='.mp4')
+    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+    output = cv2.VideoWriter(file_out, fourcc, fps, (frame.shape[1], frame.shape[0]))
 
     # Initialize the pose detection module
     with mp_pose.Pose(min_detection_confidence=detectconfidence, min_tracking_confidence=trackconfidence) as pose:
@@ -268,7 +273,9 @@ def extract_pose_keypoints(video_path, fps, detectconfidence, trackconfidence, c
             # Append the frame to the image list
             frame = image_resize(frame, height=400)
             image_list.append(frame)
-
+        
+            output.write(frame)
+        
             # Create a dictionary to store the pose landmarks
             landmarks_dict = {}
 
@@ -280,17 +287,7 @@ def extract_pose_keypoints(video_path, fps, detectconfidence, trackconfidence, c
             # Add the landmarks to Firestore
             db.collection('pose_landmarks').add(landmarks_dict)
 
-        # Convert the image list to a video
-        timestamp = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
-        file_out = tempfile.NamedTemporaryFile(suffix='.mp4')
 
-        fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-        output = cv2.VideoWriter(file_out, fourcc, fps, (frame.shape[1], frame.shape[0]))
-
-        for frame in image_list:
-            output.write(frame)
-
-        output.release()
 
         # Upload the video to Firebase Storage
         blob = bucket.blob(video_name)
@@ -302,7 +299,7 @@ def extract_pose_keypoints(video_path, fps, detectconfidence, trackconfidence, c
             expiration=datetime.timedelta(days=7),
             method='GET'
         )
-
+        output.release()
         return url
 
 
