@@ -128,11 +128,11 @@ def extract_pose_keypoints(video_path, fps, detectconfidence, trackconfidence, c
     mp_drawing = mp.solutions.drawing_utils
 
     timestamp = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
-    file_out = tempfile.NamedTemporaryFile(suffix='.mp4')
+    file_out = 'video.mp4'
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
 
     # Create a VideoWriter object
-    output = cv2.VideoWriter(file_out.name, fourcc, fps, (0, 0))
+    output = cv2.VideoWriter(file_out, fourcc, fps, (0, 0))
 
     # Initialize the pose detection module
     with mp_pose.Pose(min_detection_confidence=detectconfidence, min_tracking_confidence=trackconfidence) as pose:
