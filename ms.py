@@ -107,10 +107,10 @@ def extract_pose_keypoints(video_path, fps, detectconfidence, trackconfidence, c
     cred = credentials.Certificate('move-ai-firebase-adminsdk-p4sb8-a1d9b38655.json')
     if not firebase_admin._apps:
       firebase_admin.initialize_app(cred, {
-         'storageBucket': 'gs://move-ai.appspot.com'
+         'storageBucket': 'move-ai.appspot.com'
        })
     db = firestore.client()
-    bucket = storage.bucket('gs://move-ai.appspot.com')
+    bucket = storage.bucket('move-ai.appspot.com')
 
     tfile = tempfile.NamedTemporaryFile(delete=False)
     tfile.write(video_file.read())
