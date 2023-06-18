@@ -110,7 +110,7 @@ def extract_pose_keypoints(video_path, fps, detectconfidence, trackconfidence, c
          'storageBucket': 'move-ai.appspot.com'
        })
     db = firestore.client()
-    bucket = storage.bucket('move-ai.appspot.com')
+    bucket = storage.bucket()
 
     tfile = tempfile.NamedTemporaryFile(delete=False)
     tfile.write(video_file.read())
