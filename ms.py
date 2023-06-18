@@ -286,7 +286,7 @@ def extract_pose_keypoints(video_path, fps, detectconfidence, trackconfidence, c
         # Upload the video to Firebase Storage
         video_name = file_out.name
         blob = bucket.blob(video_name)
-        blob.upload_from_filename(file_out.name)
+        blob.upload_from_filename('video.mp4')
 
         # Get the URL of the uploaded video
         url = blob.generate_signed_url(
