@@ -284,26 +284,25 @@ def extract_pose_keypoints(video_path, fps, detectconfidence, trackconfidence, c
             frame = image_resize(frame, height=400)
             image_list.append(frame)
 
-            # Write the frame to the output video
-            output.write(frame)
+            # Encode the frame as JPEG in memory
+            _, img_encoded = cv2.imencode(".jpg", frame)
+    
+            # Convert the image data to bytes
+            img_bytes = img_encoded.tobytes()
+    
+            # Create a unique filename for the frame
+            filename = f"frame_{frame_count}.jpg"
+    
+            # Upload the image bytes to Firebase Storage
+            bucket = storage.bucket()
+            blob = bucket.blob(filename)
+            blob.upload_from_string(img_bytes, content_type="image/jpeg")
+    
+            # Get the public URL of the uploaded image
+            image_url = blob.public_url
+            print(image_url)
 
-        # Release the VideoWriter
-        output.release()
-
-        # Upload the video to Firebase Storage
-        video_name = file_out
-        blob = bucket.blob(video_name)
-        blob.upload_from_filename(video_name)
-        expiration = calculate_timedelta()
-
-        # Get the URL of the uploaded video
-        url = blob.generate_signed_url(
-            version='v4',
-            expiration=expiration,
-            method='GET'
-        )
-
-        return url
+        return df_pose, image_list
 
 
 @st.cache_data()
