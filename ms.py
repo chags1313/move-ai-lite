@@ -104,8 +104,15 @@ def image_resize(image, width = None, height = None, inter = cv2.INTER_AREA):
 
 @st.cache_data(show_spinner="Analyzing video frames...")
 def extract_pose_keypoints(video_path, fps, detectconfidence, trackconfidence, color_discrete_map, textscale, textsize, angletextcolor, linesize, markersize):
+    cred = credentials.Certificate('path/to/serviceAccountKey.json')
+    firebase_admin.initialize_app(cred, {
+        'storageBucket': '<your-storage-bucket>.appspot.com'
+    })
+    db = firestore.client()
+    bucket = storage.bucket()
+
     tfile = tempfile.NamedTemporaryFile(delete=False)
-    tfile.write(video_path.read())
+    tfile.write(video_file.read())
     cap = cv2.VideoCapture(tfile.name)
 
     # Define mediapipe pose detection module
@@ -146,18 +153,18 @@ def extract_pose_keypoints(video_path, fps, detectconfidence, trackconfidence, c
             if landmarks is not None:
                 # Draw the landmarks on the frame
                 mp_drawing.draw_landmarks(frame, landmarks, mp_pose.POSE_CONNECTIONS,
-                                        landmark_drawing_spec=mp_drawing.DrawingSpec(color=(128, 128, 128),
+                                          landmark_drawing_spec=mp_drawing.DrawingSpec(color=(128, 128, 128),
                                                                                         circle_radius=0),
-                                        connection_drawing_spec=mp_drawing.DrawingSpec(color=(255, 255, 255),
-                                                                                        thickness=linesize))
+                                          connection_drawing_spec=mp_drawing.DrawingSpec(color=(255, 255, 255),
+                                                                                          thickness=linesize))
 
                 # Add joint markers and lines
                 joint_indices = {'Left Shoulder': 11, 'Left Elbow': 13, 'Left Wrist': 15,
-                                'Right Shoulder': 12, 'Right Elbow': 14, 'Right Wrist': 16,
-                                'Right Index': 20, 'Left Index': 19,
-                                'Left Hip': 23, 'Left Knee': 25, 'Left Ankle': 27,
-                                'Right Hip': 24, 'Right Knee': 26, 'Right Ankle': 28,
-                                'Right Foot Index': 32, 'Left Foot Index': 31}
+                                 'Right Shoulder': 12, 'Right Elbow': 14, 'Right Wrist': 16,
+                                 'Right Index': 20, 'Left Index': 19,
+                                 'Left Hip': 23, 'Left Knee': 25, 'Left Ankle': 27,
+                                 'Right Hip': 24, 'Right Knee': 26, 'Right Ankle': 28,
+                                 'Right Foot Index': 32, 'Left Foot Index': 31}
 
                 for joint, idx in joint_indices.items():
                     x, y = int(landmarks.landmark[idx].x * frame.shape[1]), int(landmarks.landmark[idx].y * frame.shape[0])
@@ -258,9 +265,6 @@ def extract_pose_keypoints(video_path, fps, detectconfidence, trackconfidence, c
                         continue
 
             frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
-            # Write the frame to the output video
-            # output.write(frame)
-
             # Append the frame to the image list
             frame = image_resize(frame, height=400)
             image_list.append(frame)
@@ -273,10 +277,10 @@ def extract_pose_keypoints(video_path, fps, detectconfidence, trackconfidence, c
                 for idx, landmark in enumerate(landmarks.landmark):
                     landmarks_dict[f'landmark_{idx}'] = [landmark.x, landmark.y, landmark.z, landmark.visibility]
 
-            # Add the landmarks to the database
+            # Add the landmarks to Firestore
             db.collection('pose_landmarks').add(landmarks_dict)
 
-        # Convert the image list to a video and upload to Firebase
+        # Convert the image list to a video
         timestamp = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
         video_name = f"video_{timestamp}.mp4"
         video_path = f"path/to/videos/{video_name}"
@@ -289,8 +293,7 @@ def extract_pose_keypoints(video_path, fps, detectconfidence, trackconfidence, c
 
         output.release()
 
-        # Upload the video to Firebase
-        bucket = storage.bucket()
+        # Upload the video to Firebase Storage
         blob = bucket.blob(video_name)
         blob.upload_from_filename(video_path)
 
