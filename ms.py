@@ -292,7 +292,7 @@ def extract_pose_keypoints(video_path, fps, detectconfidence, trackconfidence, c
         # Get the URL of the uploaded video
         url = blob.generate_signed_url(
             version='v4',
-            expiration=datetime.timedelta(days=7),
+            expiration=timedelta(days=7),
             method='GET'
         )
 
