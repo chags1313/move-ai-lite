@@ -391,17 +391,13 @@ def display_video(images):
 
         # Write each frame to the temporary file
         for image in images:
+            print(image)
             video_writer.write(image)
 
         # Release the video writer
         video_writer.release()
 
-
-    # Clean up the temporary file
-    if temp_filename:
-        st.video(temp_filename)
-        os.remove(temp_filename)
-    return video_bytes
+    return temp_filename
 
 #######################################
 ######################################
