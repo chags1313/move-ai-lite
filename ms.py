@@ -104,6 +104,7 @@ def extract_pose_keypoints(video_path, fps, detectconfidence, trackconfidence, c
     tfile = tempfile.NamedTemporaryFile(delete=False)
     tfile.write(video_path.read())
     cap = cv2.VideoCapture(tfile.name)
+    os.remove(tfile.name)
 
     # Define mediapipe pose detection module
     mp_pose = mp.solutions.pose
@@ -288,7 +289,7 @@ def extract_pose_keypoints(video_path, fps, detectconfidence, trackconfidence, c
         
 
     return df_pose, video_data
-
+@st.cache_resource()
 def create_video(frames, height, width, fps):
   
   output_memory_file = BytesIO()  # Create BytesIO "in memory file".
