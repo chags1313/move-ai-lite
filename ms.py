@@ -108,14 +108,10 @@ def extract_pose_keypoints(video_path, fps, detectconfidence, trackconfidence, c
 
     # Initialize the pose detection module
     with mp_pose.Pose(min_detection_confidence=detectconfidence, min_tracking_confidence=trackconfidence) as pose:
-
-        # Create a dataframe to store the pose keypoints
-        df_pose = pd.DataFrame()
-
         frame_rate = cap.get(cv2.CAP_PROP_FPS)  # Get the frame rate of the video
         capture_interval = int(frame_rate / fps)  # Capture a frame every second
         frame_count = 0
-        image_list = []
+        frame_bytes_list = []
 
         while True:
             # Read a frame from the video
@@ -126,6 +122,10 @@ def extract_pose_keypoints(video_path, fps, detectconfidence, trackconfidence, c
                 break
 
             frame_count += 1
+
+            # Check if the frame count matches the capture interval
+            if frame_count % capture_interval != 0:
+                continue
 
             # Convert the frame to RGB
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -140,10 +140,10 @@ def extract_pose_keypoints(video_path, fps, detectconfidence, trackconfidence, c
             if landmarks is not None:
                 # Draw the landmarks on the frame
                 mp_drawing.draw_landmarks(frame, landmarks, mp_pose.POSE_CONNECTIONS,
-                                           landmark_drawing_spec=mp_drawing.DrawingSpec(color=(128, 128, 128),
-                                                                                         circle_radius=0),
-                                           connection_drawing_spec=mp_drawing.DrawingSpec(color=(255, 255, 255),
-                                                                                           thickness=linesize))
+                                          landmark_drawing_spec=mp_drawing.DrawingSpec(color=(128, 128, 128),
+                                                                                        circle_radius=0),
+                                          connection_drawing_spec=mp_drawing.DrawingSpec(color=(255, 255, 255),
+                                                                                        thickness=linesize))
 
                 # Add joint markers and lines
                 joint_indices = {'Left Shoulder': 11, 'Left Elbow': 13, 'Left Wrist': 15,
@@ -163,35 +163,40 @@ def extract_pose_keypoints(video_path, fps, detectconfidence, trackconfidence, c
                         color = hex_to_rgb(color_discrete_map['Left Elbow'])  # Orange
                     elif 'Left Wrist' in joint:
                         color = hex_to_rgb(color_discrete_map['Left Wrist'])  # White
-                    if 'Right Shoulder' in joint:
+                    elif 'Right Shoulder' in joint:
                         color = hex_to_rgb(color_discrete_map['Right Shoulder'])  # Red
                     elif 'Right Elbow' in joint:
                         color = hex_to_rgb(color_discrete_map['Right Elbow'])
                     elif 'Right Wrist' in joint:
                         color = hex_to_rgb(color_discrete_map['Right Wrist'])
+                    elif 'Left Hip' in joint:
+                        color = hex_to_rgb(color_discrete_map['Left Hip'])
+                    elif 'Left Knee' in joint:
+                        color = hex_to_rgb(color_discrete_map['Left Knee'])
+                    elif 'Left Ankle' in joint:
+                        color = hex_to_rgb(color_discrete_map['Left Ankle'])
+                    elif 'Right Hip' in joint:
+                        color = hex_to_rgb(color_discrete_map['Right Hip'])
+                    elif 'Right Knee' in joint:
+                        color = hex_to_rgb(color_discrete_map['Right Knee'])
+                    elif 'Right Ankle' in joint:
+                        color = hex_to_rgb(color_discrete_map['Right Ankle'])
 
                     # Draw joint markers
                     cv2.circle(frame, (x, y), markersize, color, -1)
 
                     # ... (code to calculate and display joint angles)
 
-            frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
-            frame = image_resize(frame, height=400)
-            image_list.append(frame)
-
-            # Create a dictionary to store the pose keypoints
-            landmarks_dict = {}
-
-            # If landmarks are detected, store them in the dictionary
-            if landmarks is not None:
-                for idx, landmark in enumerate(landmarks.landmark):
-                    landmarks_dict[f'landmark_{idx}'] = [landmark.x, landmark.y, landmark.z, landmark.visibility]
-
-            # Add the landmarks to the dataframe
-            df_pose = df_pose.append(landmarks_dict, ignore_index=True)
+            frame_bytes = cv2.imencode(".jpg", frame)[1].tobytes()
+            frame_bytes_list.append(frame_bytes)
 
         # Release the video capture
         cap.release()
+
+        # Convert the frame bytes list to a byte array
+        video_bytes = bytearray()
+        for frame_bytes in frame_bytes_list:
+            video_bytes.extend(frame_bytes)
 
         # Convert the dataframe to seconds
         df_pose['Frame'] = df_pose.index / fps
@@ -201,19 +206,6 @@ def extract_pose_keypoints(video_path, fps, detectconfidence, trackconfidence, c
 
         df_pose['time'] = pd.date_range(start='00:00:00', periods=data_points, freq=time_interval)
         df_pose = df_pose.set_index('time')
-
-        # Save frames as images
-        image_buffer = BytesIO()
-        for i, image in enumerate(image_list):
-            image_path = f'image_{i}.jpg'
-            cv2.imwrite(image_path, image)
-            image_bytes = open(image_path, 'rb').read()
-            image_buffer.write(image_bytes)
-            image_buffer.write(b'\n')
-        image_buffer.seek(0)
-
-        # Create a video from the images in the buffer
-        video_bytes = create_video_from_images(image_buffer, fps)
 
     return df_pose, video_bytes
 
