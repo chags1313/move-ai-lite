@@ -561,7 +561,7 @@ if video_file is not None:
         joint_line_plot = create_joint_line_plot(df_joint_angles, jnt, 
                                                  slide = int(st.session_state['slide_value'] * fps), 
                                                  color_discrete_map=color_discrete_map,
-                                                height = 200)
+                                                height = 500)
         # Create joint velocity plot
         joint_velocity_plot = create_joint_velocity_plot(df_joint_angles, 
                                                          jnt, 
