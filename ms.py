@@ -603,7 +603,7 @@ if video_file is not None:
                 time.sleep(1/30)
         #st.plotly_chart(imag, use_container_width=True, config= {'displaylogo': False})
         #cnr.image(st.session_state.key_arr[int(st.session_state['slide_value'] * fps)], channels='BGR')
-        st.video(st.session_state.key_arr)
+        st.image(st.session_state.key_arr[0])
         st.write("_____")
         st.write("_____")
 
