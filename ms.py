@@ -289,6 +289,17 @@ def extract_pose_keypoints(video_path, fps, detectconfidence, trackconfidence, c
     return df_pose, image_list
 
 def create_video(frames):
+  width, height, fps = 192, 108, 10  # Select video resolution and framerate.
+  
+  output_memory_file = io.BytesIO()  # Create BytesIO "in memory file".
+  
+  output = av.open(output_memory_file, 'w', format="mp4")  # Open "in memory file" as MP4 video output
+  stream = output.add_stream('h264', str(fps))  # Add H.264 video stream to the MP4 container, with framerate = fps.
+  stream.width = width  # Set frame width
+  stream.height = height  # Set frame height
+  #stream.pix_fmt = 'yuv444p'   # Select yuv444p pixel format (better quality than default yuv420p).
+  stream.pix_fmt = 'yuv420p'   # Select yuv420p pixel format for wider compatibility.
+  stream.options = {'crf': '17'}  # Select low crf for high quality (the price is larger file size).
   # Iterate the created images, encode and write to MP4 memory file.
   for i in range(len(frames)):
       img = frames[i]  # Create OpenCV image for testing (resolution 192x108, pixel format BGR).
