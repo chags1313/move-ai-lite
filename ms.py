@@ -566,7 +566,7 @@ if video_file is not None:
                                                  color_discrete_map=color_discrete_map,
                                                 height = 500)
         st.plotly_chart(joint_line_plot, use_container_width=True, config= {'displaylogo': False})
-        st.download_button("Download Joint Angles", df_joint_angles.to_csv().encode('utf-8'), use_container_width=True)
+        st.download_button("Download Joint Angles", df_joint_angles.to_csv(), use_container_width=True)
         le, ri = st.columns(2)
         for joint in jnt:
             if joint.startswith("Left"):
@@ -632,7 +632,7 @@ if video_file is not None:
                 ri.write("____")
 
     with data:
-        st.download_button("Download Joint Velocities", df_joint_angles.diff(fps).abs().to_csv().encode('utf-8'), use_container_width=True)
+        st.download_button("Download Joint Velocities", df_joint_angles.diff(fps).abs().to_csv(), use_container_width=True)
         # Create joint velocity plot
         joint_velocity_plot = create_joint_velocity_plot(df_joint_angles, 
                                                          jnt, 
