@@ -107,13 +107,14 @@ def extract_pose_keypoints(video_path, fps, detectconfidence, trackconfidence, c
     # Define mediapipe pose detection module
     mp_pose = mp.solutions.pose
     mp_drawing = mp.solutions.drawing_utils
+    ofile = tempfile.NamedTemporaryFile(delete=False)
 
     # Initialize the pose detection module
     with mp_pose.Pose(min_detection_confidence=detectconfidence, min_tracking_confidence=trackconfidence) as pose:
         wdt = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         ht = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
         fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-        output = cv2.VideoWriter(tfile.name, fourcc, fps, (wdt, ht))
+        output = cv2.VideoWriter(ofile.name, fourcc, fps, (wdt, ht))
 
         # Create a dataframe to store the pose keypoints
         df_pose = pd.DataFrame()
@@ -289,7 +290,7 @@ def extract_pose_keypoints(video_path, fps, detectconfidence, trackconfidence, c
         df_pose['time'] = pd.date_range(start='00:00:00', periods=data_points, freq=time_interval)
         df_pose = df_pose.set_index('time')
 
-    return df_pose, open(tfile.name, 'rb').read()
+    return df_pose, open(ofile.name, 'rb').read()
 
 
 @st.cache_data()
