@@ -585,7 +585,6 @@ if video_file is not None:
             st.write(st.session_state.df_pose, use_container_width = True)
 
     with analysis:
-        #st.success("Joint Angles", icon = '📐')
         le, ri = st.columns(2)
         for joint in jnt:
             if joint.startswith("Left"):
@@ -648,6 +647,71 @@ if video_file is not None:
                 ri.code(f"Max: {round(df_joint_angles[joint].max(), 2)} degrees")
                 ri.code(f"Range: {round(df_joint_angles[joint].max() - df_joint_angles[joint].min(), 2)} degrees")
                 ri.plotly_chart(create_joint_line_plot(df_joint_angles, joint, slide = None, color_discrete_map = color_discrete_map, height = 260), use_container_width = True, config= {'displaylogo': False, 'renderer': 'svg', 'staticPlot': True})
+                ri.write("____")
+
+    with data:
+        le, ri = st.columns(2)
+        for joint in jnt:
+            if joint.startswith("Left"):
+                if 'Wrist' in joint or 'Ankle' in joint:
+                    html_str = f"""<p style = 'background-color: {color_discrete_map[joint]};
+                                    color: black;
+                                    font-size: 14px;
+                                    border-radius: 7px;
+                                    padding-left: 12px;
+                                    padding-top: 13px;
+                                    padding-bottom: 13px;
+                                    line-height: 25px;'>
+                                    {joint} 💨</style>
+                                    <BR></p>"""
+                else:
+                    html_str = f"""<p style = 'background-color: {color_discrete_map[joint]};
+                                    color: white;
+                                    font-size: 14px;
+                                    border-radius: 7px;
+                                    padding-left: 12px;
+                                    padding-top: 13px;
+                                    padding-bottom: 13px;
+                                    line-height: 25px;'>
+                                    {joint} 💨</style>
+                                <BR></p>"""
+                le.markdown(html_str, unsafe_allow_html=True)
+                le.code(f"Mean: {round(df_joint_angles[joint].diff(fps).abs().mean(), 2)} degrees")
+                le.code(f"Min: {round(df_joint_angles[joint].diff(fps).abs(.min(), 2)} degrees")
+                le.code(f"Max: {round(df_joint_angles[joint].diff(fps).abs(.max(), 2)} degrees")
+                le.code(f"Range: {round(df_joint_angles[joint].diff(fps).abs(.max() - df_joint_angles[joint].min(), 2)} degrees")
+                le.plotly_chart(create_joint_velocity_plot(df_joint_angles, joint, slide = 0, color_discrete_map = color_discrete_map, height = 260), use_container_width = True, config= {'displaylogo': False, 'renderer': 'svg', 'staticPlot': True})
+                le.write("____")
+        for joint in jnt:
+            if joint.startswith("Right"):
+                if 'Wrist' in joint or 'Ankle' in joint:
+                    html_str = f"""<p style = 'background-color: {color_discrete_map[joint]};
+                                    color: black;
+                                    font-size: 14px;
+                                    border-radius: 7px;
+                                    padding-left: 12px;
+                                    padding-top: 13px;
+                                    padding-bottom: 13px;
+                                    line-height: 25px;'>
+                                    {joint} 💨</style>
+                                    <BR></p>"""
+                else:
+                    html_str = f"""<p style = 'background-color: {color_discrete_map[joint]};
+                                    color: white;
+                                    font-size: 14px;
+                                    border-radius: 7px;
+                                    padding-left: 12px;
+                                    padding-top: 13px;
+                                    padding-bottom: 13px;
+                                    line-height: 25px;'>
+                                    {joint} 💨</style>
+                                <BR></p>"""
+                ri.markdown(html_str, unsafe_allow_html=True)
+                ri.code(f"Mean: {round(df_joint_angles[joint].diff(fps).abs(.mean(), 2)} degrees")
+                ri.code(f"Min: {round(df_joint_angles[joint].diff(fps).abs(.min(), 2)} degrees")
+                ri.code(f"Max: {round(df_joint_angles[joint].diff(fps).abs(.max(), 2)} degrees")
+                ri.code(f"Range: {round(df_joint_angles[joint].diff(fps).abs(.max() - df_joint_angles[joint].min(), 2)} degrees")
+                ri.plotly_chart(create_joint_velocity_plot(df_joint_angles, joint, slide = 0, color_discrete_map = color_discrete_map, height = 260), use_container_width = True, config= {'displaylogo': False, 'renderer': 'svg', 'staticPlot': True})
                 ri.write("____")
 else:
     with analysis:
