@@ -435,7 +435,7 @@ with upload:
     trackconfidence = l.number_input("Tracking Confidence", value = 0.85, step = 0.1, help = 'The minimum confidence level to be used for tracking joints over time. This is on a scale of 0 to 1. 0 represents low confidence and 1 represents high confidence.')
     detectconfidence = r.number_input("Detection Confidence", value = 0.85, step = 0.1, help = 'The minimum confidence level to be used for detecting joints. This is on a scale of 0 to 1. 0 represents low confidence and 1 represents high confidence.')
     video_file = st.file_uploader("Upload a video", 
-                            help = "Upload a video to markerless motion capture data.")
+                            help = "Upload a video to markerless motion capture data.", on_change = lambda: st.cache_data.clear())
     with st.expander("Advanced Motion Capture Settings"):
         l1, r1 = st.columns(2)
         fx = 640
