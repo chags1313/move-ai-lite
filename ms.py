@@ -107,14 +107,11 @@ def extract_pose_keypoints(video_path, fps, detectconfidence, trackconfidence, c
     # Define mediapipe pose detection module
     mp_pose = mp.solutions.pose
     mp_drawing = mp.solutions.drawing_utils
-    ofile = tempfile.NamedTemporaryFile(delete=False)
 
     # Initialize the pose detection module
     with mp_pose.Pose(min_detection_confidence=detectconfidence, min_tracking_confidence=trackconfidence) as pose:
         wdt = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         ht = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-        fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-        output = cv2.VideoWriter(ofile.name, fourcc, fps, (wdt, ht))
 
         # Create a dataframe to store the pose keypoints
         df_pose = pd.DataFrame()
@@ -261,8 +258,6 @@ def extract_pose_keypoints(video_path, fps, detectconfidence, trackconfidence, c
                         continue
 
             frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
-            # Write the frame to the output video
-            output.write(frame)
 
             # Append the frame to the image list
             frame = image_resize(frame, height=400)
@@ -279,7 +274,6 @@ def extract_pose_keypoints(video_path, fps, detectconfidence, trackconfidence, c
             # Add the landmarks to the dataframe
             df_pose = df_pose.append(landmarks_dict, ignore_index=True)
 
-        output.release()
 
         # Convert the dataframe to seconds
         df_pose['Frame'] = df_pose.index / fps
@@ -289,11 +283,27 @@ def extract_pose_keypoints(video_path, fps, detectconfidence, trackconfidence, c
 
         df_pose['time'] = pd.date_range(start='00:00:00', periods=data_points, freq=time_interval)
         df_pose = df_pose.set_index('time')
-        print(ofile.name)
-        print("%%%%%%%%%%%%%")
         
 
-    return df_pose, open(ofile.name, 'rb').read()
+    return df_pose, image_list
+
+def create_video(n_frames):
+  # Iterate the created images, encode and write to MP4 memory file.
+  for i in range(n_frmaes):
+      img = make_sample_image(i)  # Create OpenCV image for testing (resolution 192x108, pixel format BGR).
+      frame = av.VideoFrame.from_ndarray(img, format='bgr24')  # Convert image from NumPy Array to frame.
+      packet = stream.encode(frame)  # Encode video frame
+      output.mux(packet)  # "Mux" the encoded frame (add the encoded frame to MP4 file).
+  
+  # Flush the encoder
+  packet = stream.encode(None)
+  output.mux(packet)
+  output.close()
+  
+  output_memory_file.seek(0)  # Seek to the beginning of the BytesIO.
+  #video_bytes = output_memory_file.read()  # Convert BytesIO to bytes array
+  #st.video(video_bytes)
+  st.video(output_memory_file)  # Streamlit supports BytesIO object - we don't have to convert it to bytes array.
 
 
 @st.cache_data()
@@ -644,6 +654,7 @@ if video_file is not None:
             st.write(st.session_state.df_pose, use_container_width = True)
 
     with analysis:
+        create_video()
         #st.success("Joint Angles", icon = '📐')
         le, ri = st.columns(2)
         for joint in jnt:
