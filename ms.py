@@ -567,10 +567,11 @@ if video_file is not None:
                                                          color_discrete_map=color_discrete_map,
                                                         height = 250)
         l, r = st.columns(2)
+        r.write("____")
         r.plotly_chart(joint_velocity_plot, use_container_width=True, config= {'displaylogo': False})
-        l.write("____")
+        r.write("____")
         l.video(st.session_state.key_arr)
-        l.write("____")
+
         #r.plotly_chart(joint_line_plot, use_container_width=True, config= {'displaylogo': False})
 
 
