@@ -289,7 +289,7 @@ def extract_pose_keypoints(video_path, fps, detectconfidence, trackconfidence, c
         
 
     return df_pose, video_data
-@st.cache_resource()
+
 def create_video(frames, height, width, fps):
   
   output_memory_file = BytesIO()  # Create BytesIO "in memory file".
