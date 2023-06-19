@@ -391,10 +391,10 @@ def create_joint_velocity_plot(df_joint_angles, jnt, slide, color_discrete_map, 
     joint_velocity_plot = px.area(df_joint_angles.diff(10).abs(), 
                                   y = jnt, 
                                   color_discrete_map=color_discrete_map)
-    joint_velocity_plot.update_layout(height = height, hovermode="x", showlegend = False)
+    joint_velocity_plot.update_layout(height = height, hovermode="x", showlegend = False, title = 'Velocity (degrees/second)')
     joint_velocity_plot.update_xaxes(tickformat="%H:%M:%S", title = 'Seconds (HH:MM:SS)')
-    joint_velocity_plot.update_yaxes(title = 'Velocity (degrees/second)')
-    joint_velocity_plot.add_vline(x = df_joint_angles['time'].iloc[slide], line_color = 'grey')
+    joint_velocity_plot.update_yaxes(title = None)
+    #joint_velocity_plot.add_hline(x = df_joint_angles['time'].iloc[slide], line_color = 'grey')
     return joint_velocity_plot
 
 #######################################
