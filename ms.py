@@ -539,12 +539,12 @@ with upload:
     st.markdown(htm, unsafe_allow_html=True)
 
 if video_file is not None:
-    with upload:
-        st.video(video_file)
     with analysis:
         # Process the video to extract pose keypoints
         st.session_state.df_pose, st.session_state.key_arr = extract_pose_keypoints(video_file, fps, detectconfidence, trackconfidence, color_discrete_map, textscale, textsize, angletextcolor, linesize, markersize)
         # Calculate joint angles
+        with upload:
+          st.video(st.session_state.key_arr)
         df_joint_angles = calculate_joint_angles(st.session_state.df_pose)
         # Perform exponential weighted mean on joint angles to smooth data
         df_joint_angles = df_joint_angles.ewm(com=1.5, adjust = False).mean()
@@ -569,9 +569,8 @@ if video_file is not None:
                                                          color_discrete_map=color_discrete_map,
                                                         height = 200)
         l, m,  r = st.columns(3)
-        m.plotly_chart(joint_velocity_plot, use_container_width=True, config= {'displaylogo': False})
-        l.video(st.session_state.key_arr)
-        r.plotly_chart(joint_line_plot, use_container_width=True, config= {'displaylogo': False})
+        #st.plotly_chart(joint_velocity_plot, use_container_width=True, config= {'displaylogo': False})
+        st.plotly_chart(joint_line_plot, use_container_width=True, config= {'displaylogo': False})
 
 
     with data:
