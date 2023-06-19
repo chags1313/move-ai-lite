@@ -568,7 +568,9 @@ if video_file is not None:
                                                         height = 250)
         l, r = st.columns(2)
         r.plotly_chart(joint_velocity_plot, use_container_width=True, config= {'displaylogo': False})
-        l.video(st.session_state.key_arr, start_time = 5)
+        l.write("____")
+        l.video(st.session_state.key_arr)
+        l.write("____")
         #r.plotly_chart(joint_line_plot, use_container_width=True, config= {'displaylogo': False})
 
 
