@@ -385,40 +385,6 @@ def create_joint_velocity_plot(df_joint_angles, jnt, slide, color_discrete_map, 
     joint_velocity_plot.update_yaxes(title = 'Velocity (degrees/second)')
     joint_velocity_plot.add_vline(x = df_joint_angles['time'].iloc[slide], line_color = 'grey')
     return joint_velocity_plot
-def display_video(images):
-    # Create an in-memory video buffer using BytesIO
-    video_buffer = BytesIO()
-
-    # Get dimensions from the first image
-    height, width, _ = images[0].shape
-
-    # Create a VideoWriter object with the desired codec and FPS
-    fourcc = cv2.VideoWriter_fourcc(*"mp4v")
-    fps = 25.0
-
-    # Save the video buffer to a temporary file
-    with tempfile.NamedTemporaryFile(suffix=".mp4", delete=False) as temp_file:
-        temp_filename = temp_file.name
-
-        # Create a VideoWriter object with the temporary file name
-        video_writer = cv2.VideoWriter(temp_filename, fourcc, fps, (width, height))
-
-        # Write each frame to the temporary file
-        for image in images:
-            video_writer.write(image)
-
-        # Release the video writer
-        video_writer.release()
-
-    # Read the temporary file as bytes
-    with open(temp_filename, "rb") as file:
-        video_bytes = file.read()
-
-    # Clean up the temporary file
-    if temp_filename:
-        os.remove(temp_filename)
-
-    return video_bytes
 
 #######################################
 ######################################
@@ -642,8 +608,6 @@ if video_file is not None:
 
     with data:
         # Display the video in Streamlit
-        video_bytes = display_video(st.session_state.key_arr)
-        st.video(video_bytes)
         with st.expander("Joint Angles", expanded = True):
             st.warning("Expressed as degrees over time.")
             st.download_button("Download Joint Angles", df_joint_angles.to_csv().encode('utf-8'), use_container_width=True)
