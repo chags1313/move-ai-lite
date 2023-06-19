@@ -291,7 +291,7 @@ def extract_pose_keypoints(video_path, fps, detectconfidence, trackconfidence, c
 def create_video(frames):
   # Iterate the created images, encode and write to MP4 memory file.
   for i in range(len(frames)):
-      img = make_sample_image(frames[i])  # Create OpenCV image for testing (resolution 192x108, pixel format BGR).
+      img = frames[i]  # Create OpenCV image for testing (resolution 192x108, pixel format BGR).
       frame = av.VideoFrame.from_ndarray(img, format='bgr24')  # Convert image from NumPy Array to frame.
       packet = stream.encode(frame)  # Encode video frame
       output.mux(packet)  # "Mux" the encoded frame (add the encoded frame to MP4 file).
