@@ -677,9 +677,9 @@ if video_file is not None:
                                 <BR></p>"""
                 le.markdown(html_str, unsafe_allow_html=True)
                 le.code(f"Mean: {round(df_joint_angles[joint].diff(fps).abs().mean(), 2)} degrees")
-                le.code(f"Min: {round(df_joint_angles[joint].diff(fps).abs(.min(), 2)} degrees")
-                le.code(f"Max: {round(df_joint_angles[joint].diff(fps).abs(.max(), 2)} degrees")
-                le.code(f"Range: {round(df_joint_angles[joint].diff(fps).abs(.max() - df_joint_angles[joint].min(), 2)} degrees")
+                le.code(f"Min: {round(df_joint_angles[joint].diff(fps).abs().min(), 2)} degrees")
+                le.code(f"Max: {round(df_joint_angles[joint].diff(fps).abs().max(), 2)} degrees")
+                le.code(f"Range: {round(df_joint_angles[joint].diff(fps).abs().max() - df_joint_angles[joint].min(), 2)} degrees")
                 le.plotly_chart(create_joint_velocity_plot(df_joint_angles, joint, slide = 0, color_discrete_map = color_discrete_map, height = 260), use_container_width = True, config= {'displaylogo': False, 'renderer': 'svg', 'staticPlot': True})
                 le.write("____")
         for joint in jnt:
