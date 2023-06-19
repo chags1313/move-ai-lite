@@ -6,14 +6,6 @@ import numpy as np
 import plotly.express as px
 import tempfile
 import time
-import datetime
-import firebase_admin
-from firebase_admin import credentials
-from firebase_admin import firestore
-from firebase_admin import storage
-from datetime import datetime
-from datetime import timedelta
-
 
 #######################################
 ######################################
@@ -21,7 +13,7 @@ from datetime import timedelta
 #######################################
 #######################################
 
-st.set_page_config(page_title = 'Pose', 
+st.set_page_config(page_title = 'MoveSense', 
                    layout = 'wide',
                    page_icon = '🌐',
                    menu_items = {'Get Help': 'mailto:hagencolej@gmail.com',
@@ -44,6 +36,7 @@ button {
 hide_streamlit_style = """
             <style>
             footer {visibility: hidden;}
+            MainMenu {visibility: hidden;}
             </style>
             """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True) 
@@ -63,12 +56,6 @@ st.markdown(hide_img_fs, unsafe_allow_html=True)
 # THis is the beginning of the utilities
 #######################################
 #######################################
-
-def calculate_timedelta():
-    now = datetime.now()
-    seven_days = timedelta(days=7)
-    expiration = now + seven_days
-    return expiration
 
 def hex_to_rgb(hex_string):
     r_hex = hex_string[1:3]
@@ -111,31 +98,24 @@ def image_resize(image, width = None, height = None, inter = cv2.INTER_AREA):
 
 @st.cache_data(show_spinner="Analyzing video frames...")
 def extract_pose_keypoints(video_path, fps, detectconfidence, trackconfidence, color_discrete_map, textscale, textsize, angletextcolor, linesize, markersize):
-    cred = credentials.Certificate('move-ai-firebase-adminsdk-p4sb8-a1d9b38655.json')
-    if not firebase_admin._apps:
-      firebase_admin.initialize_app(cred, {
-         'storageBucket': 'move-ai.appspot.com'
-       })
-    db = firestore.client()
-    bucket = storage.bucket()
-
     tfile = tempfile.NamedTemporaryFile(delete=False)
-    tfile.write(video_file.read())
+    tfile.write(video_path.read())
     cap = cv2.VideoCapture(tfile.name)
 
     # Define mediapipe pose detection module
     mp_pose = mp.solutions.pose
     mp_drawing = mp.solutions.drawing_utils
 
-    timestamp = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
-    file_out = 'video.mp4'
-    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-
-    # Create a VideoWriter object
-    output = cv2.VideoWriter(file_out, fourcc, fps, (0, 0))
-
     # Initialize the pose detection module
     with mp_pose.Pose(min_detection_confidence=detectconfidence, min_tracking_confidence=trackconfidence) as pose:
+        #fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+        #output = cv2.VideoWriter('C:/Users/chags/OneDrive/Desktop/HARPipe/video.mp4', fourcc, fps, (fx, fy))
+        #wdt = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+        #ht = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+
+        # Create a dataframe to store the pose keypoints
+        df_pose = pd.DataFrame()
+
         frame_rate = cap.get(cv2.CAP_PROP_FPS)  # Get the frame rate of the video
         capture_interval = int(frame_rate / fps)  # Capture a frame every second
         frame_count = 0
@@ -155,23 +135,25 @@ def extract_pose_keypoints(video_path, fps, detectconfidence, trackconfidence, c
             if frame_count % capture_interval != 0:
                 continue
 
-            # Convert the frame to RGB
-            frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            # Convert the frame to RGB and resize if needed
+            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            #frame = cv2.resize(frame, (fx, fy))  # Adjust the size as needed
 
             # Process the frame to extract the pose keypoints
-            results = pose.process(frame_rgb)
+            results = pose.process(frame)
 
             # Extract the pose landmarks from the results
             landmarks = results.pose_landmarks
 
             # If landmarks are detected, draw them on the frame
             if landmarks is not None:
+
                 # Draw the landmarks on the frame
                 mp_drawing.draw_landmarks(frame, landmarks, mp_pose.POSE_CONNECTIONS,
-                                          landmark_drawing_spec=mp_drawing.DrawingSpec(color=(128, 128, 128),
-                                                                                        circle_radius=0),
-                                          connection_drawing_spec=mp_drawing.DrawingSpec(color=(255, 255, 255),
-                                                                                          thickness=linesize))
+                                           landmark_drawing_spec=mp_drawing.DrawingSpec(color=(128, 128, 128),
+                                                                                         circle_radius=0),
+                                           connection_drawing_spec=mp_drawing.DrawingSpec(color=(255, 255, 255),
+                                                                                           thickness=linesize))
 
                 # Add joint markers and lines
                 joint_indices = {'Left Shoulder': 11, 'Left Elbow': 13, 'Left Wrist': 15,
@@ -186,7 +168,7 @@ def extract_pose_keypoints(video_path, fps, detectconfidence, trackconfidence, c
 
                     # Assign colors to joint markers
                     if 'Left Shoulder' in joint:
-                        color = hex_to_rgb(color_discrete_map['Left Shoulder'])  # Red
+                        color = hex_to_rgb(color_discrete_map['Left Shoulder']) # Red
                     elif 'Left Elbow' in joint:
                         color = hex_to_rgb(color_discrete_map['Left Elbow'])  # Orange
                     elif 'Left Wrist' in joint:
@@ -212,7 +194,6 @@ def extract_pose_keypoints(video_path, fps, detectconfidence, trackconfidence, c
 
                     # Draw joint markers
                     cv2.circle(frame, (x, y), markersize, color, -1)
-
                     def calculate_angle(landmarks, joint1, joint2, joint3):
                         # Get the landmarks for the specified joints
                         landmark1 = landmarks.landmark[joint_indices[joint1]]
@@ -268,41 +249,46 @@ def extract_pose_keypoints(video_path, fps, detectconfidence, trackconfidence, c
                         angle = ''
                     try:
                         if angletextcolor == 'Grey':
-                            cv2.putText(frame, f'{angle:.2f}', (x + 10, y + 10), cv2.FONT_HERSHEY_SIMPLEX,
-                                        textscale, (128, 128, 128), textsize)
+                            cv2.putText(frame, f'{angle:.2f}', (x + 10, y + 10), cv2.FONT_HERSHEY_SIMPLEX, textscale, (128, 128, 128), textsize)
                         if angletextcolor == 'White':
-                            cv2.putText(frame, f'{angle:.2f}', (x + 10, y + 10), cv2.FONT_HERSHEY_SIMPLEX,
-                                        textscale, (255, 255, 255), textsize)
+                            cv2.putText(frame, f'{angle:.2f}', (x + 10, y + 10), cv2.FONT_HERSHEY_SIMPLEX, textscale, (255, 255, 255), textsize)
                         if angletextcolor == 'Black':
-                            cv2.putText(frame, f'{angle:.2f}', (x + 10, y + 10), cv2.FONT_HERSHEY_SIMPLEX,
-                                        textscale, (0, 0, 0), textsize)
+                            cv2.putText(frame, f'{angle:.2f}', (x + 10, y + 10), cv2.FONT_HERSHEY_SIMPLEX, textscale, (0, 0, 0), textsize)
                     except:
                         continue
 
+
             frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+            # Write the frame to the output video
+            #output.write(frame)
+
             # Append the frame to the image list
-            frame = image_resize(frame, height=400)
+            frame = image_resize(frame, height = 400)
             image_list.append(frame)
 
-            # Encode the frame as JPEG in memory
-            _, img_encoded = cv2.imencode(".jpg", frame)
-    
-            # Convert the image data to bytes
-            img_bytes = img_encoded.tobytes()
-    
-            # Create a unique filename for the frame
-            filename = f"frame_{frame_count}.jpg"
-    
-            # Upload the image bytes to Firebase Storage
-            bucket = storage.bucket()
-            blob = bucket.blob(filename)
-            blob.upload_from_string(img_bytes, content_type="image/jpeg")
-    
-            # Get the public URL of the uploaded image
-            image_url = blob.public_url
-            print(image_url)
+            # Create a dictionary to store the pose landmarks
+            landmarks_dict = {}
 
-        return df_pose, image_list
+            # If landmarks are detected, store them in the dictionary
+            if landmarks is not None:
+                for idx, landmark in enumerate(landmarks.landmark):
+                    landmarks_dict[f'landmark_{idx}'] = [landmark.x, landmark.y, landmark.z, landmark.visibility]
+
+            # Add the landmarks to the dataframe
+            df_pose = df_pose.append(landmarks_dict, ignore_index=True)
+ 
+        #output.release()
+        
+        # Convert the dataframe to seconds
+        df_pose['Frame'] = df_pose.index / fps
+        diff = df_pose['Frame'].iloc[1] - df_pose['Frame'].iloc[0]
+        data_points = len(df_pose)
+        time_interval = pd.Timedelta(seconds=diff)
+
+        df_pose['time'] = pd.date_range(start='00:00:00', periods=data_points, freq=time_interval)
+        df_pose = df_pose.set_index('time')
+
+    return df_pose, image_list
 
 
 @st.cache_data()
@@ -384,7 +370,31 @@ def create_joint_velocity_plot(df_joint_angles, jnt, slide, color_discrete_map, 
     joint_velocity_plot.update_yaxes(title = 'Velocity (degrees/second)')
     joint_velocity_plot.add_vline(x = df_joint_angles['time'].iloc[slide], line_color = 'grey')
     return joint_velocity_plot
+def display_video(images):
+    # Create an in-memory video buffer using BytesIO
+    video_buffer = BytesIO()
 
+    # Get dimensions from the first image
+    height, width, _ = images[0].shape
+
+    # Create a VideoWriter object with the desired codec and FPS
+    fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+    fps = 25.0
+    video_writer = cv2.VideoWriter(video_buffer, fourcc, fps, (width, height))
+
+    # Write each frame to the in-memory video buffer
+    for image in images:
+        video_writer.write(image)
+
+    # Release the video writer
+    video_writer.release()
+
+    # Seek to the beginning of the video buffer
+    video_buffer.seek(0)
+
+    # Read the video buffer as bytes
+    video_bytes = video_buffer.read()
+    return video_bytes
 
 #######################################
 ######################################
@@ -396,7 +406,7 @@ def create_joint_velocity_plot(df_joint_angles, jnt, slide, color_discrete_map, 
 titleleft, titleright, l = st.columns([1,10, 2])
 titleleft.image('https://github.com/chags1313/move-ai/blob/main/Ms.png?raw=true',
          width = 100)
-titleright.title("MotionSense", anchor = False)
+titleright.title("MoveSense", anchor = False)
 #st.markdown("<h4 style='text-align: center;'>MeasureUp</h4>", unsafe_allow_html=True)
 st.markdown(
 """
@@ -529,17 +539,18 @@ if video_file is not None:
         st.video(video_file)
     with analysis:
         # Process the video to extract pose keypoints
-        df_pose, key_arr = extract_pose_keypoints(video_file, fps, detectconfidence, trackconfidence, color_discrete_map, textscale, textsize, angletextcolor, linesize, markersize)
+        if 'df_pose' not in st.session_state:
+          st.session_state.df_pose, st.session_state.key_arr = extract_pose_keypoints(video_file, fps, detectconfidence, trackconfidence, color_discrete_map, textscale, textsize, angletextcolor, linesize, markersize)
         # Calculate joint angles
-        df_joint_angles = calculate_joint_angles(df_pose)
+        df_joint_angles = calculate_joint_angles(st.session_state.df_pose)
         # Perform exponential weighted mean on joint angles to smooth data
         df_joint_angles = df_joint_angles.ewm(com=1.5, adjust = False).mean()
         # Slider to display specific time of values
         if 'slide_value' not in st.session_state:
             st.session_state['slide_value'] = 0.0
         #rs, c, ls = st.columns(3)
-        step = df_pose['Frame'].iloc[1] - df_pose['Frame'].iloc[0]
-        max_step = df_pose['Frame'].max()
+        step = st.session_state.df_pose['Frame'].iloc[1] - st.session_state.df_pose['Frame'].iloc[0]
+        max_step = st.session_state.df_pose['Frame'].max()
         df_joint_angles['time'] = df_joint_angles.index
         options = [col for col in df_joint_angles.drop(['time'], axis = 1).columns]
         jnt = st.multiselect('Joint', key = 'jnt', options = options, default = options, label_visibility='collapsed', help = 'Joints to plot')
@@ -583,7 +594,7 @@ if video_file is not None:
                     break
                 # Display the image using Streamlit
                 st.session_state['slide_value'] = i
-                cnr.image(key_arr[int(st.session_state['slide_value'] * fps)], channels='BGR')
+                cnr.image(st.session_state.key_arr[int(st.session_state['slide_value'] * fps)], channels='BGR')
                 slide_container.slider("TIMER",
                            min_value = 0.0,
                              max_value = max_step,
@@ -598,19 +609,21 @@ if video_file is not None:
                 # Wait for the specified time to achieve the desired frame rate
                 time.sleep(1/30)
         #st.plotly_chart(imag, use_container_width=True, config= {'displaylogo': False})
-        cnr.image(key_arr[int(st.session_state['slide_value'] * fps)], channels='BGR')
+        cnr.image(st.session_state.key_arr[int(st.session_state['slide_value'] * fps)], channels='BGR')
         st.write("_____")
         st.write("_____")
 
     with data:
+        vid = display_video(image_list)
+        st.video(st.session_state.key_arr)
         with st.expander("Joint Angles", expanded = True):
             st.warning("Expressed as degrees over time.")
             st.download_button("Download Joint Angles", df_joint_angles.to_csv().encode('utf-8'), use_container_width=True)
             st.dataframe(df_joint_angles, use_container_width=True)
         with st.expander("Keypoints", expanded = True):
             st.warning("Expressed as tuple(x,y,z,confidence) over time")
-            st.download_button("Download Joint Postions", df_pose.to_csv().encode('utf-8'), use_container_width=True)
-            st.write(df_pose, use_container_width = True)
+            st.download_button("Download Joint Postions", st.session_state.df_pose.to_csv().encode('utf-8'), use_container_width=True)
+            st.write(st.session_state.df_pose, use_container_width = True)
 
     with analysis:
         #st.success("Joint Angles", icon = '📐')
