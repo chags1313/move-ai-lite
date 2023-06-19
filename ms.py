@@ -800,7 +800,7 @@ if video_file is not None:
                 st.session_state['slide_value'] = i
                 #cnr.image(st.session_state.key_arr[int(st.session_state['slide_value'] * fps)], channels='BGR')
                 print(st.session_state.key_arr)
-                cnr.write(st.session_state.key_arr)
+                cnr.video(st.session_state.key_arr)
                 slide_container.slider("TIMER",
                            min_value = 0.0,
                              max_value = max_step,
