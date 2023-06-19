@@ -381,20 +381,26 @@ def display_video(images):
     # Create a VideoWriter object with the desired codec and FPS
     fourcc = cv2.VideoWriter_fourcc(*"mp4v")
     fps = 25.0
-    video_writer = cv2.VideoWriter(video_buffer, fourcc, fps, (width, height))
 
-    # Write each frame to the in-memory video buffer
-    for image in images:
-        video_writer.write(image)
+    # Save the video buffer to a temporary file
+    with tempfile.NamedTemporaryFile(suffix=".mp4", delete=False) as temp_file:
+        temp_filename = temp_file.name
 
-    # Release the video writer
-    video_writer.release()
+        # Create a VideoWriter object with the temporary file
+        video_writer = cv2.VideoWriter(temp_filename, fourcc, fps, (width, height))
 
-    # Seek to the beginning of the video buffer
-    video_buffer.seek(0)
+        # Write each frame to the temporary file
+        for image in images:
+            video_writer.write(image)
 
-    # Read the video buffer as bytes
-    video_bytes = video_buffer.read()
+        # Release the video writer
+        video_writer.release()
+
+
+    # Clean up the temporary file
+    if temp_filename:
+        st.video(temp_filename)
+        os.remove(temp_filename)
     return video_bytes
 
 #######################################
