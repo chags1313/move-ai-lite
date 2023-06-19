@@ -291,7 +291,7 @@ def extract_pose_keypoints(video_path, fps, detectconfidence, trackconfidence, c
 def create_video(frames):
   width, height, fps = 192, 108, 10  # Select video resolution and framerate.
   
-  output_memory_file = io.BytesIO()  # Create BytesIO "in memory file".
+  output_memory_file = BytesIO()  # Create BytesIO "in memory file".
   
   output = av.open(output_memory_file, 'w', format="mp4")  # Open "in memory file" as MP4 video output
   stream = output.add_stream('h264', str(fps))  # Add H.264 video stream to the MP4 container, with framerate = fps.
