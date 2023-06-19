@@ -117,9 +117,6 @@ def extract_pose_keypoints(video_path, fps, detectconfidence, trackconfidence, c
         frame_count = 0
         image_list = []
 
-        # Create an in-memory video buffer
-        video_buffer = BytesIO()
-
         while True:
             # Read a frame from the video
             ret, frame = cap.read()
@@ -182,9 +179,6 @@ def extract_pose_keypoints(video_path, fps, detectconfidence, trackconfidence, c
             frame = image_resize(frame, height=400)
             image_list.append(frame)
 
-            # Write the frame to the video buffer
-            video_buffer.write(cv2.imencode('.jpg', frame)[1].tobytes())
-
             # Create a dictionary to store the pose keypoints
             landmarks_dict = {}
 
@@ -208,10 +202,51 @@ def extract_pose_keypoints(video_path, fps, detectconfidence, trackconfidence, c
         df_pose['time'] = pd.date_range(start='00:00:00', periods=data_points, freq=time_interval)
         df_pose = df_pose.set_index('time')
 
-        # Get the video bytes from the video buffer
-        video_bytes = video_buffer.getvalue()
+        # Save frames as images
+        image_buffer = BytesIO()
+        for i, image in enumerate(image_list):
+            image_path = f'image_{i}.jpg'
+            cv2.imwrite(image_path, image)
+            image_bytes = open(image_path, 'rb').read()
+            image_buffer.write(image_bytes)
+            image_buffer.write(b'\n')
+        image_buffer.seek(0)
+
+        # Create a video from the images in the buffer
+        video_bytes = create_video_from_images(image_buffer, fps)
 
     return df_pose, video_bytes
+
+
+def create_video_from_images(image_buffer, fps):
+    # Create a VideoWriter object with the desired codec and FPS
+    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+    video_writer = cv2.VideoWriter()
+
+    # Create an in-memory video buffer using BytesIO
+    video_buffer = BytesIO()
+
+    # Get the dimensions of the first image in the buffer
+    first_image = cv2.imread('image_0.jpg')
+    height, width, _ = first_image.shape
+
+    # Open the video writer with the video buffer
+    video_writer.open(video_buffer, fourcc, fps, (width, height))
+
+    # Write each image from the buffer to the video writer
+    image_buffer.seek(0)
+    for image_bytes in image_buffer:
+        image_array = np.frombuffer(image_bytes, np.uint8)
+        image = cv2.imdecode(image_array, cv2.IMREAD_COLOR)
+        video_writer.write(image)
+
+    # Release the video writer
+    video_writer.release()
+
+    # Get the video bytes from the video buffer
+    video_bytes = video_buffer.getvalue()
+
+    return video_bytes
 
 
 @st.cache_data()
