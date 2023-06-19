@@ -398,6 +398,7 @@ def create_joint_velocity_plot(df_joint_angles, jnt, slide, color_discrete_map, 
     return joint_velocity_plot
 
 def update_info():
+  video_file = st.session_state.video_file
   st.cache_data.clear()
   st.session_state.df_pose, st.session_state.key_arr = extract_pose_keypoints(video_file, fps, detectconfidence, trackconfidence, color_discrete_map, textscale, textsize, angletextcolor, linesize, markersize)
 
@@ -438,8 +439,9 @@ with upload:
     fps = st.number_input("Frames Per Second", value = 10, step = 1, help = 'Frames per second (FPS) to be processed. Processing time increases as FPS increases.')
     trackconfidence = l.number_input("Tracking Confidence", value = 0.85, step = 0.1, help = 'The minimum confidence level to be used for tracking joints over time. This is on a scale of 0 to 1. 0 represents low confidence and 1 represents high confidence.')
     detectconfidence = r.number_input("Detection Confidence", value = 0.85, step = 0.1, help = 'The minimum confidence level to be used for detecting joints. This is on a scale of 0 to 1. 0 represents low confidence and 1 represents high confidence.')
-    video_file = st.file_uploader("Upload a video", 
+    st.session_state.video_file = st.file_uploader("Upload a video", 
                             help = "Upload a video to markerless motion capture data.", on_change = update_info)
+    video_file = st.session_state.video_file
     with st.expander("Advanced Motion Capture Settings"):
         l1, r1 = st.columns(2)
         fx = 640
