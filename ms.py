@@ -555,67 +555,14 @@ if video_file is not None:
         df_joint_angles['time'] = df_joint_angles.index
         options = [col for col in df_joint_angles.drop(['time'], axis = 1).columns]
         jnt = st.multiselect('Joint', key = 'jnt', options = options, default = options, label_visibility='collapsed', help = 'Joints to plot')
-        with st.expander("Controls"):
-            st.write("")
-            c1, c2, c3, c4, c5  = st.columns([1,1,1,1,4])
-        slide_container = c5.empty()
-        slide = slide_container.slider("Time",
-                           min_value = 0.0,
-                             max_value = max_step,
-                               step = step,
-                                   key = 'side1',
-                                     value = float(st.session_state['slide_value']),
-                                        label_visibility='collapsed')
-        st.session_state['slide_value'] = slide
-        prev = c3.button("⏮️", use_container_width=True)
-        if prev:
-            if st.session_state['slide_value'] != 0.0:
-                st.session_state['slide_value']  = st.session_state['slide_value'] - step
-        next = c4.button("⏭️", use_container_width=True)
-        if next:
-            if st.session_state['slide_value'] < max_step:
-                st.session_state['slide_value']  = st.session_state['slide_value'] + step
-        play = c2.button("▶️", use_container_width=True)
-        pause = c1.button("⏸️", use_container_width=True)
-        im, pl = st.columns(2)
-        cnr = im.empty()
-        pl1 = pl.empty()
-        #pl2 = pl.empty()
+        # Create joint line plot
         joint_line_plot = create_joint_line_plot(df_joint_angles, jnt, slide = int(st.session_state['slide_value'] * fps), color_discrete_map=color_discrete_map)
         # Create joint velocity plot
         joint_velocity_plot = create_joint_velocity_plot(df_joint_angles, jnt, slide = int(st.session_state['slide_value'] * fps), color_discrete_map=color_discrete_map)
+        st.video(st.session_state.key_arr, start_time = 5)
         st.plotly_chart(joint_velocity_plot, use_container_width=True, config= {'displaylogo': False})
         st.plotly_chart(joint_line_plot, use_container_width=True, config= {'displaylogo': False})
-        if play:
-            # Iterate over the images
-            for i in np.arange(st.session_state.slide_value, max_step, step):
-                if pause == True:
-                    break
-                if st.session_state['slide_value'] >= max_step - step:
-                    break
-                # Display the image using Streamlit
-                st.session_state['slide_value'] = i
-                #cnr.image(st.session_state.key_arr[int(st.session_state['slide_value'] * fps)], channels='BGR')
-                print(st.session_state.key_arr)
-                cnr.video(st.session_state.key_arr)
-                slide_container.slider("TIMER",
-                           min_value = 0.0,
-                             max_value = max_step,
-                               step = step,
-                                     value = float(st.session_state['slide_value']),
-                                        label_visibility='collapsed')
-                joint_line_plot = create_joint_line_plot(df_joint_angles, jnt, slide = int(st.session_state['slide_value'] * fps), color_discrete_map=color_discrete_map)
-                # Create joint velocity plot
-                joint_velocity_plot = create_joint_velocity_plot(df_joint_angles, jnt, slide = int(st.session_state['slide_value'] * fps), color_discrete_map=color_discrete_map)
-                pl1.plotly_chart(joint_velocity_plot, use_container_width=True, config= {'displaylogo': False})
-                pl2.plotly_chart(joint_line_plot, use_container_width=True, config= {'displaylogo': False})
-                # Wait for the specified time to achieve the desired frame rate
-                time.sleep(1/30)
-        #st.plotly_chart(imag, use_container_width=True, config= {'displaylogo': False})
-        #cnr.image(st.session_state.key_arr[int(st.session_state['slide_value'] * fps)], channels='BGR')
-        st.video(st.session_state.key_arr, start_time = 5)
-        st.write("_____")
-        st.write("_____")
+
 
     with data:
         # Display the video in Streamlit
