@@ -618,7 +618,7 @@ if video_file is not None:
             st.write(st.session_state.df_pose, use_container_width = True)
 
     with analysis:
-        create_video()
+        create_video(st.session_state.key_arr)
         #st.success("Joint Angles", icon = '📐')
         le, ri = st.columns(2)
         for joint in jnt:
