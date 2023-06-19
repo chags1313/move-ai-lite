@@ -556,13 +556,20 @@ if video_file is not None:
         options = [col for col in df_joint_angles.drop(['time'], axis = 1).columns]
         jnt = st.multiselect('Joint', key = 'jnt', options = options, default = options, label_visibility='collapsed', help = 'Joints to plot')
         # Create joint line plot
-        joint_line_plot = create_joint_line_plot(df_joint_angles, jnt, slide = int(st.session_state['slide_value'] * fps), color_discrete_map=color_discrete_map)
+        joint_line_plot = create_joint_line_plot(df_joint_angles, jnt, 
+                                                 slide = int(st.session_state['slide_value'] * fps), 
+                                                 color_discrete_map=color_discrete_map,
+                                                height = 400)
         # Create joint velocity plot
-        joint_velocity_plot = create_joint_velocity_plot(df_joint_angles, jnt, slide = int(st.session_state['slide_value'] * fps), color_discrete_map=color_discrete_map)
-        r, l = st.columns(2)
+        joint_velocity_plot = create_joint_velocity_plot(df_joint_angles, 
+                                                         jnt, 
+                                                         slide = int(st.session_state['slide_value'] * fps), 
+                                                         color_discrete_map=color_discrete_map,
+                                                        height = 400)
+        l, r = st.columns(2)
         r.plotly_chart(joint_velocity_plot, use_container_width=True, config= {'displaylogo': False})
         l.video(st.session_state.key_arr, start_time = 5)
-        r.plotly_chart(joint_line_plot, use_container_width=True, config= {'displaylogo': False})
+        st.plotly_chart(joint_line_plot, use_container_width=True, config= {'displaylogo': False})
 
 
     with data:
