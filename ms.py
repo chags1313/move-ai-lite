@@ -399,7 +399,6 @@ def create_joint_velocity_plot(df_joint_angles, jnt, slide, color_discrete_map, 
 
 def update_info():
   video_file = st.session_state.video_file
-  st.cache_data.clear()
   st.session_state.df_pose, st.session_state.key_arr = extract_pose_keypoints(video_file, fps, detectconfidence, trackconfidence, color_discrete_map, textscale, textsize, angletextcolor, linesize, markersize)
 
 #######################################
