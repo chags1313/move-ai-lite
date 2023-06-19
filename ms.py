@@ -284,7 +284,7 @@ def extract_pose_keypoints(video_path, fps, detectconfidence, trackconfidence, c
 
         df_pose['time'] = pd.date_range(start='00:00:00', periods=data_points, freq=time_interval)
         df_pose = df_pose.set_index('time')
-        video_data = create_video(image_list, ht, wdt, fps)
+        video_data = create_video(frame = image_list, height = ht, width = wdt, fps = fps)
         
 
     return df_pose, video_data
