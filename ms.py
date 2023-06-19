@@ -618,7 +618,7 @@ if video_file is not None:
 
     with data:
         vid = display_video(st.session_state.key_arr)
-        st.video(np.array(st.session_state.key_arr)
+        st.video(np.array(st.session_state.key_arr))
         with st.expander("Joint Angles", expanded = True):
             st.warning("Expressed as degrees over time.")
             st.download_button("Download Joint Angles", df_joint_angles.to_csv().encode('utf-8'), use_container_width=True)
