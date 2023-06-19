@@ -284,12 +284,12 @@ def extract_pose_keypoints(video_path, fps, detectconfidence, trackconfidence, c
 
         df_pose['time'] = pd.date_range(start='00:00:00', periods=data_points, freq=time_interval)
         df_pose = df_pose.set_index('time')
+        video_data = create_video(image_list, ht, wt, fps)
         
 
-    return df_pose, image_list
+    return df_pose, video_data
 
-def create_video(frames):
-  width, height, fps = 192, 108, 10  # Select video resolution and framerate.
+def create_video(frames, height, width, fps):
   
   output_memory_file = BytesIO()  # Create BytesIO "in memory file".
   
@@ -313,9 +313,7 @@ def create_video(frames):
   output.close()
   
   output_memory_file.seek(0)  # Seek to the beginning of the BytesIO.
-  #video_bytes = output_memory_file.read()  # Convert BytesIO to bytes array
-  #st.video(video_bytes)
-  st.video(output_memory_file)  # Streamlit supports BytesIO object - we don't have to convert it to bytes array.
+  return output_memory_file
 
 
 @st.cache_data()
@@ -614,7 +612,7 @@ if video_file is not None:
                 time.sleep(1/30)
         #st.plotly_chart(imag, use_container_width=True, config= {'displaylogo': False})
         #cnr.image(st.session_state.key_arr[int(st.session_state['slide_value'] * fps)], channels='BGR')
-        st.image(st.session_state.key_arr[0])
+        cnr.video(st.session_state.key_arr)
         st.write("_____")
         st.write("_____")
 
