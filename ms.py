@@ -382,23 +382,23 @@ def display_video(images):
     fourcc = cv2.VideoWriter_fourcc(*"mp4v")
     fps = 25.0
 
-    # Save the video buffer to a temporary file
-    with tempfile.NamedTemporaryFile(suffix=".mp4", delete=False) as temp_file:
-        temp_filename = temp_file.name
+    # Create a VideoWriter object with the video buffer
+    video_writer = cv2.VideoWriter(video_buffer, fourcc, fps, (width, height))
 
-        # Create a VideoWriter object with the temporary file
-        video_writer = cv2.VideoWriter(temp_filename, fourcc, fps, (width, height))
+    # Write each frame to the video buffer
+    for image in images:
+        video_writer.write(image)
 
-        # Write each frame to the temporary file
-        for image in images:
-            video_writer.write(image)
-        st.video(temp_filename)
-        st.write(temp_filename)
+    # Release the video writer
+    video_writer.release()
 
-        # Release the video writer
-        video_writer.release()
+    # Seek to the beginning of the video buffer
+    video_buffer.seek(0)
 
-    return temp_filename
+    # Read the video buffer as bytes
+    video_bytes = video_buffer.read()
+
+    return video_bytes
 
 #######################################
 ######################################
@@ -618,8 +618,9 @@ if video_file is not None:
         st.write("_____")
 
     with data:
-        vid = display_video(st.session_state.key_arr)
-        st.video(np.array(st.session_state.key_arr))
+        # Display the video in Streamlit
+        video_bytes = display_video(st.session_state.key_arr)
+        st.video(video_bytes)
         with st.expander("Joint Angles", expanded = True):
             st.warning("Expressed as degrees over time.")
             st.download_button("Download Joint Angles", df_joint_angles.to_csv().encode('utf-8'), use_container_width=True)
