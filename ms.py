@@ -289,6 +289,9 @@ def extract_pose_keypoints(video_path, fps, detectconfidence, trackconfidence, c
 
         df_pose['time'] = pd.date_range(start='00:00:00', periods=data_points, freq=time_interval)
         df_pose = df_pose.set_index('time')
+        print(ofile.name)
+        print("%%%%%%%%%%%%%")
+        
 
     return df_pose, open(ofile.name, 'rb').read()
 
