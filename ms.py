@@ -386,9 +386,9 @@ def create_joint_line_plot(df_joint_angles, jnt, slide, color_discrete_map, heig
         color = color_discrete_map[jnt]
         joint_line_plot.update_traces(line_color = color)
     return joint_line_plot
-def create_joint_velocity_plot(df_joint_angles, jnt, slide, color_discrete_map, height = 200):
+def create_joint_velocity_plot(df_joint_angles, jnt, fps, slide, color_discrete_map, height = 200):
     df_joint_angles['time'] = df_joint_angles.index
-    joint_velocity_plot = px.area(df_joint_angles.diff(10).abs(), 
+    joint_velocity_plot = px.area(df_joint_angles.diff(fps).abs(), 
                                   y = jnt, 
                                   color_discrete_map=color_discrete_map)
     joint_velocity_plot.update_layout(height = height, hovermode="x", showlegend = False)
@@ -564,29 +564,8 @@ if video_file is not None:
                                                  slide = int(st.session_state['slide_value'] * fps), 
                                                  color_discrete_map=color_discrete_map,
                                                 height = 500)
-        # Create joint velocity plot
-        joint_velocity_plot = create_joint_velocity_plot(df_joint_angles, 
-                                                         jnt, 
-                                                         slide = int(st.session_state['slide_value'] * fps), 
-                                                         color_discrete_map=color_discrete_map,
-                                                        height = 200)
-        l, m,  r = st.columns(3)
-        #st.plotly_chart(joint_velocity_plot, use_container_width=True, config= {'displaylogo': False})
         st.plotly_chart(joint_line_plot, use_container_width=True, config= {'displaylogo': False})
-
-
-    with data:
-        # Display the video in Streamlit
-        with st.expander("Joint Angles", expanded = True):
-            st.warning("Expressed as degrees over time.")
-            st.download_button("Download Joint Angles", df_joint_angles.to_csv().encode('utf-8'), use_container_width=True)
-            st.dataframe(df_joint_angles, use_container_width=True)
-        with st.expander("Keypoints", expanded = True):
-            st.warning("Expressed as tuple(x,y,z,confidence) over time")
-            st.download_button("Download Joint Postions", st.session_state.df_pose.to_csv().encode('utf-8'), use_container_width=True)
-            st.write(st.session_state.df_pose, use_container_width = True)
-
-    with analysis:
+        st.download_button("Download Joint Angles", df_joint_angles.to_csv().encode('utf-8'), use_container_width=True)
         le, ri = st.columns(2)
         for joint in jnt:
             if joint.startswith("Left"):
@@ -652,6 +631,15 @@ if video_file is not None:
                 ri.write("____")
 
     with data:
+        st.download_button("Download Joint Velocities", df_joint_angles.diff(fps).abs().to_csv().encode('utf-8'), use_container_width=True)
+        # Create joint velocity plot
+        joint_velocity_plot = create_joint_velocity_plot(df_joint_angles, 
+                                                         jnt, 
+                                                         fps,
+                                                         slide = int(st.session_state['slide_value'] * fps), 
+                                                         color_discrete_map=color_discrete_map,
+                                                        height = 500)
+        st.plotly_chart(joint_velocity_plot, use_container_width=True, config= {'displaylogo': False})
         le, ri = st.columns(2)
         for joint in jnt:
             if joint.startswith("Left"):
