@@ -580,12 +580,12 @@ if video_file is not None:
         im, pl = st.columns(2)
         cnr = im.empty()
         pl1 = pl.empty()
-        pl2 = pl.empty()
+        #pl2 = pl.empty()
         joint_line_plot = create_joint_line_plot(df_joint_angles, jnt, slide = int(st.session_state['slide_value'] * fps), color_discrete_map=color_discrete_map)
         # Create joint velocity plot
         joint_velocity_plot = create_joint_velocity_plot(df_joint_angles, jnt, slide = int(st.session_state['slide_value'] * fps), color_discrete_map=color_discrete_map)
         pl1.plotly_chart(joint_velocity_plot, use_container_width=True, config= {'displaylogo': False})
-        pl2.plotly_chart(joint_line_plot, use_container_width=True, config= {'displaylogo': False})
+        st.plotly_chart(joint_line_plot, use_container_width=True, config= {'displaylogo': False})
         if play:
             # Iterate over the images
             for i in np.arange(st.session_state.slide_value, max_step, step):
