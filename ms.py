@@ -100,7 +100,9 @@ def image_resize(image, width = None, height = None, inter = cv2.INTER_AREA):
 
 @st.cache_data(show_spinner="Analyzing video frames...")
 def extract_pose_keypoints(video_path, fps, detectconfidence, trackconfidence, color_discrete_map, textscale, textsize, angletextcolor, linesize, markersize):
-    cap = cv2.VideoCapture(str(video_path))
+    tfile = tempfile.NamedTemporaryFile(delete=False)
+    tfile.write(video_path.read())
+    cap = cv2.VideoCapture(tfile.name)
 
     # Define mediapipe pose detection module
     mp_pose = mp.solutions.pose
@@ -108,10 +110,18 @@ def extract_pose_keypoints(video_path, fps, detectconfidence, trackconfidence, c
 
     # Initialize the pose detection module
     with mp_pose.Pose(min_detection_confidence=detectconfidence, min_tracking_confidence=trackconfidence) as pose:
+        wdt = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+        ht = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+        output = cv2.VideoWriter(tfile.name, fourcc, fps, (wdt, ht))
+
+        # Create a dataframe to store the pose keypoints
+        df_pose = pd.DataFrame()
+
         frame_rate = cap.get(cv2.CAP_PROP_FPS)  # Get the frame rate of the video
         capture_interval = int(frame_rate / fps)  # Capture a frame every second
         frame_count = 0
-        frame_bytes_list = []
+        image_list = []
 
         while True:
             # Read a frame from the video
@@ -127,8 +137,9 @@ def extract_pose_keypoints(video_path, fps, detectconfidence, trackconfidence, c
             if frame_count % capture_interval != 0:
                 continue
 
-            # Convert the frame to RGB
+            # Convert the frame to RGB and resize if needed
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            # frame = cv2.resize(frame, (fx, fy))  # Adjust the size as needed
 
             # Process the frame to extract the pose keypoints
             results = pose.process(frame)
@@ -138,12 +149,13 @@ def extract_pose_keypoints(video_path, fps, detectconfidence, trackconfidence, c
 
             # If landmarks are detected, draw them on the frame
             if landmarks is not None:
+
                 # Draw the landmarks on the frame
                 mp_drawing.draw_landmarks(frame, landmarks, mp_pose.POSE_CONNECTIONS,
                                           landmark_drawing_spec=mp_drawing.DrawingSpec(color=(128, 128, 128),
                                                                                         circle_radius=0),
                                           connection_drawing_spec=mp_drawing.DrawingSpec(color=(255, 255, 255),
-                                                                                        thickness=linesize))
+                                                                                          thickness=linesize))
 
                 # Add joint markers and lines
                 joint_indices = {'Left Shoulder': 11, 'Left Elbow': 13, 'Left Wrist': 15,
@@ -163,7 +175,7 @@ def extract_pose_keypoints(video_path, fps, detectconfidence, trackconfidence, c
                         color = hex_to_rgb(color_discrete_map['Left Elbow'])  # Orange
                     elif 'Left Wrist' in joint:
                         color = hex_to_rgb(color_discrete_map['Left Wrist'])  # White
-                    elif 'Right Shoulder' in joint:
+                    if 'Right Shoulder' in joint:
                         color = hex_to_rgb(color_discrete_map['Right Shoulder'])  # Red
                     elif 'Right Elbow' in joint:
                         color = hex_to_rgb(color_discrete_map['Right Elbow'])
@@ -184,19 +196,89 @@ def extract_pose_keypoints(video_path, fps, detectconfidence, trackconfidence, c
 
                     # Draw joint markers
                     cv2.circle(frame, (x, y), markersize, color, -1)
+                    def calculate_angle(landmarks, joint1, joint2, joint3):
+                        # Get the landmarks for the specified joints
+                        landmark1 = landmarks.landmark[joint_indices[joint1]]
+                        landmark2 = landmarks.landmark[joint_indices[joint2]]
+                        landmark3 = landmarks.landmark[joint_indices[joint3]]
 
-                    # ... (code to calculate and display joint angles)
+                        # Calculate the vectors between the landmarks
+                        vector1 = np.array([landmark1.x, landmark1.y])
+                        vector2 = np.array([landmark2.x, landmark2.y])
+                        vector3 = np.array([landmark3.x, landmark3.y])
 
-            frame_bytes = cv2.imencode(".jpg", frame)[1].tobytes()
-            frame_bytes_list.append(frame_bytes)
+                        # Calculate the vectors between joints
+                        v1 = vector1 - vector2
+                        v2 = vector3 - vector2
 
-        # Release the video capture
-        cap.release()
+                        # Calculate the angle using dot product and magnitudes
+                        angle = np.arccos(np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2)))
 
-        # Convert the frame bytes list to a byte array
-        video_bytes = bytearray()
-        for frame_bytes in frame_bytes_list:
-            video_bytes.extend(frame_bytes)
+                        return np.degrees(angle)
+
+                    # Calculate and display joint angles
+                    if joint == 'Left Shoulder':
+                        angle = calculate_angle(landmarks, 'Left Elbow', 'Left Shoulder', 'Left Hip')
+                    elif joint == 'Left Elbow':
+                        angle = calculate_angle(landmarks, 'Left Shoulder', 'Left Elbow', 'Left Wrist')
+                    elif joint == 'Left Wrist':
+                        angle = calculate_angle(landmarks, 'Left Elbow', 'Left Wrist', 'Left Index')
+                    elif joint == 'Right Shoulder':
+                        angle = calculate_angle(landmarks, 'Right Elbow', 'Right Shoulder', 'Right Hip')
+                    elif joint == 'Right Elbow':
+                        angle = calculate_angle(landmarks, 'Right Shoulder', 'Right Elbow', 'Right Wrist')
+                    elif joint == 'Right Wrist':
+                        angle = calculate_angle(landmarks, 'Right Elbow', 'Right Wrist', 'Right Index')
+                    elif joint == 'Left Hip':
+                        angle = calculate_angle(landmarks, 'Left Knee', 'Left Hip', 'Left Shoulder')
+                    elif joint == 'Left Knee':
+                        angle = calculate_angle(landmarks, 'Left Hip', 'Left Knee', 'Left Ankle')
+                    elif joint == 'Left Ankle':
+                        angle = calculate_angle(landmarks, 'Left Knee', 'Left Ankle', 'Left Foot Index')
+                    elif joint == 'Right Hip':
+                        angle = calculate_angle(landmarks, 'Right Knee', 'Right Hip', 'Right Shoulder')
+                    elif joint == 'Right Knee':
+                        angle = calculate_angle(landmarks, 'Right Hip', 'Right Knee', 'Right Ankle')
+                    elif joint == 'Right Ankle':
+                        angle = calculate_angle(landmarks, 'Right Knee', 'Right Ankle', 'Right Foot Index')
+                    elif joint == 'Right Foot Index':
+                        angle = ''
+                    elif joint == 'Left Foot Index':
+                        angle = ''
+                    elif joint == 'Right Index':
+                        angle = ''
+                    elif joint == 'Left Index':
+                        angle = ''
+                    try:
+                        if angletextcolor == 'Grey':
+                            cv2.putText(frame, f'{angle:.2f}', (x + 10, y + 10), cv2.FONT_HERSHEY_SIMPLEX, textscale, (128, 128, 128), textsize)
+                        if angletextcolor == 'White':
+                            cv2.putText(frame, f'{angle:.2f}', (x + 10, y + 10), cv2.FONT_HERSHEY_SIMPLEX, textscale, (255, 255, 255), textsize)
+                        if angletextcolor == 'Black':
+                            cv2.putText(frame, f'{angle:.2f}', (x + 10, y + 10), cv2.FONT_HERSHEY_SIMPLEX, textscale, (0, 0, 0), textsize)
+                    except:
+                        continue
+
+            frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+            # Write the frame to the output video
+            output.write(frame)
+
+            # Append the frame to the image list
+            frame = image_resize(frame, height=400)
+            image_list.append(frame)
+
+            # Create a dictionary to store the pose landmarks
+            landmarks_dict = {}
+
+            # If landmarks are detected, store them in the dictionary
+            if landmarks is not None:
+                for idx, landmark in enumerate(landmarks.landmark):
+                    landmarks_dict[f'landmark_{idx}'] = [landmark.x, landmark.y, landmark.z, landmark.visibility]
+
+            # Add the landmarks to the dataframe
+            df_pose = df_pose.append(landmarks_dict, ignore_index=True)
+
+        output.release()
 
         # Convert the dataframe to seconds
         df_pose['Frame'] = df_pose.index / fps
@@ -207,7 +289,7 @@ def extract_pose_keypoints(video_path, fps, detectconfidence, trackconfidence, c
         df_pose['time'] = pd.date_range(start='00:00:00', periods=data_points, freq=time_interval)
         df_pose = df_pose.set_index('time')
 
-    return df_pose, video_bytes
+    return df_pose, open(tfile.name, 'rb').read()
 
 
 def extract_pose_keypoints(video_path, fps, detectconfidence, trackconfidence, color_discrete_map, textscale, textsize, angletextcolor, linesize, markersize):
