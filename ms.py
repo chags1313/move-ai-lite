@@ -526,7 +526,8 @@ if video_file is not None:
                     break
                 # Display the image using Streamlit
                 st.session_state['slide_value'] = i
-                cnr.image(st.session_state.key_arr[int(st.session_state['slide_value'] * fps)], channels='BGR')
+                #cnr.image(st.session_state.key_arr[int(st.session_state['slide_value'] * fps)], channels='BGR')
+                cnr.video(st.session_state.key_arr)
                 slide_container.slider("TIMER",
                            min_value = 0.0,
                              max_value = max_step,
