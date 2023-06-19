@@ -419,6 +419,7 @@ st.markdown(
 Human movement insights powered by computer vision and a single camera
 """)
 l.button("Log in 👤")
+jnt_container = st.empty()
 upload, analysis, data = st.tabs(['File', 'Analysis', 'Data'])
 color_discrete_map={
 'Right Shoulder': '#ff8000',
@@ -558,7 +559,7 @@ if video_file is not None:
         max_step = st.session_state.df_pose['Frame'].max()
         df_joint_angles['time'] = df_joint_angles.index
         options = [col for col in df_joint_angles.drop(['time'], axis = 1).columns]
-        jnt = st.multiselect('Joint', key = 'jnt', options = options, default = options, label_visibility='collapsed', help = 'Joints to plot')
+        jnt = jnt_container.multiselect('Joint', key = 'jnt', options = options, default = options, label_visibility='collapsed', help = 'Joints to plot')
         # Create joint line plot
         joint_line_plot = create_joint_line_plot(df_joint_angles, jnt, 
                                                  slide = int(st.session_state['slide_value'] * fps), 
