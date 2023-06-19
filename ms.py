@@ -391,10 +391,9 @@ def display_video(images):
 
         # Write each frame to the temporary file
         for image in images:
-            print(image)
             video_writer.write(image)
         st.video(temp_filename)
-        print(temp_filename)
+        st.write(temp_filename)
 
         # Release the video writer
         video_writer.release()
