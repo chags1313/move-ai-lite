@@ -287,7 +287,7 @@ def extract_pose_keypoints(video_path, fps, detectconfidence, trackconfidence, c
 
     return df_pose, image_list
 
-def create_video(n_fraes):
+def create_video(n_frmaes):
   # Iterate the created images, encode and write to MP4 memory file.
   for i in range(n_frmaes):
       img = make_sample_image(i)  # Create OpenCV image for testing (resolution 192x108, pixel format BGR).
