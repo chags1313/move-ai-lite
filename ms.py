@@ -559,8 +559,8 @@ if video_file is not None:
         joint_line_plot = create_joint_line_plot(df_joint_angles, jnt, slide = int(st.session_state['slide_value'] * fps), color_discrete_map=color_discrete_map)
         # Create joint velocity plot
         joint_velocity_plot = create_joint_velocity_plot(df_joint_angles, jnt, slide = int(st.session_state['slide_value'] * fps), color_discrete_map=color_discrete_map)
-        st.video(st.session_state.key_arr, start_time = 5)
         st.plotly_chart(joint_velocity_plot, use_container_width=True, config= {'displaylogo': False})
+        st.video(st.session_state.key_arr, start_time = 5)
         st.plotly_chart(joint_line_plot, use_container_width=True, config= {'displaylogo': False})
 
 
