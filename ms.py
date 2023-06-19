@@ -568,8 +568,8 @@ if video_file is not None:
                                                          slide = int(st.session_state['slide_value'] * fps), 
                                                          color_discrete_map=color_discrete_map,
                                                         height = 200)
-        l, r = st.columns(2)
-        r.plotly_chart(joint_velocity_plot, use_container_width=True, config= {'displaylogo': False})
+        l, m,  r = st.columns(3)
+        m.plotly_chart(joint_velocity_plot, use_container_width=True, config= {'displaylogo': False})
         l.video(st.session_state.key_arr)
         r.plotly_chart(joint_line_plot, use_container_width=True, config= {'displaylogo': False})
 
