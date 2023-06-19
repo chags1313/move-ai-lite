@@ -393,6 +393,8 @@ def display_video(images):
         for image in images:
             print(image)
             video_writer.write(image)
+        st.video(temp_filename)
+        print(temp_filename)
 
         # Release the video writer
         video_writer.release()
