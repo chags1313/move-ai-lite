@@ -9,7 +9,6 @@ import time
 from io import BytesIO
 import os
 import av
-import webbrowser
 
 
 #######################################
@@ -420,9 +419,10 @@ st.markdown(
 """
 Human movement insights powered by computer vision and a single camera
 """)
-sett = l.button("❔ Help")
-if sett:
-  webbrowser.open_new_tab('https://github.com/chags1313/MoveSense')
+l.markdown(
+  """
+  <a href='https://github.com/chags1313/MoveSense' target="_blank"><img alt='Github' src='https://img.shields.io/badge/Help-100000?style=flat&logo=Github&logoColor=FFFFFF&labelColor=595757&color=3F3F3F'/></a>
+  """)
 upload, analysis, data = st.tabs(['Pose Estimation', 'Angle', 'Velocity'])
 color_discrete_map={
 'Right Shoulder': '#ff8000',
