@@ -422,7 +422,7 @@ Human movement insights powered by computer vision and a single camera
 """)
 sett = l.button("❔ Help")
 if sett:
-  webbrowser.open('https://github.com/chags1313/MoveSense')
+  webbrowser.open_new_tab('https://github.com/chags1313/MoveSense')
 upload, analysis, data = st.tabs(['Pose Estimation', 'Angle', 'Velocity'])
 color_discrete_map={
 'Right Shoulder': '#ff8000',
