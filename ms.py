@@ -447,8 +447,7 @@ color_discrete_map={
 'Left Ankle': '#ccccff'
 }
 with upload:
-    container_left, container_right = st.columns(2)
-    video_file = container_left.file_uploader("Upload a video", 
+    video_file = st.file_uploader("Upload a video", 
                             help = "Upload a video to markerless motion capture data.")
     with st.expander("Advanced Motion Capture Settings"):
           l, r = st.columns(2)
@@ -563,6 +562,7 @@ if video_file is not None:
         st.session_state.df_pose, st.session_state.key_arr = extract_pose_keypoints(video_file, fps, detectconfidence, trackconfidence, color_discrete_map, textscale, textsize, angletextcolor, linesize, markersize)
         # Calculate joint angles
         with upload:
+          container_left, container_right = st.columns(2)
           st.video(st.session_state.key_arr)
         df_joint_angles = calculate_joint_angles(st.session_state.df_pose)
         # Perform exponential weighted mean on joint angles to smooth data
