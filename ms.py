@@ -423,7 +423,7 @@ Human movement insights powered by computer vision and a single camera
 sett = l.button("❔ Help")
 if sett:
   modal = Modal(key="Demo Key",title="Help")
-  with modal:
+  with modal.container():
     """
     - Upload a video to get started
     - Use the advanced motion capture settings to customize analyses
