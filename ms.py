@@ -451,7 +451,7 @@ with upload:
                             help = "Upload a video to markerless motion capture data.")
     with st.expander("Advanced Motion Capture Settings"):
           l, r = st.columns(2)
-          fps = st.number_input("Frames Per Second", value = 3, max_value = 3, min_value = 1, step = 1, help = 'Frames per second (FPS) to be processed. Processing time increases as FPS increases.')
+          fps = st.number_input("Frames Per Second", value = 3, max_value = 10, min_value = 1, step = 1, help = 'Frames per second (FPS) to be processed. Processing time increases as FPS increases.')
           trackconfidence = l.number_input("Tracking Confidence", value = 0.85, step = 0.1, help = 'The minimum confidence level to be used for tracking joints over time. This is on a scale of 0 to 1. 0 represents low confidence and 1 represents high confidence.')
           detectconfidence = r.number_input("Detection Confidence", value = 0.85, step = 0.1, help = 'The minimum confidence level to be used for detecting joints. This is on a scale of 0 to 1. 0 represents low confidence and 1 represents high confidence.')
           l1, r1 = st.columns(2)
