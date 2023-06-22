@@ -421,8 +421,7 @@ Human movement insights powered by computer vision and a single camera
 """)
 l.markdown(
   """
-  <a href='https://github.com/chags1313/MoveSense' target="_blank"><img alt='Github' src='https://img.shields.io/badge/Help-100000?style=flat&logo=Github&logoColor=FFFFFF&labelColor=595757&color=3F3F3F'/></a>
-  """)
+[![Stack Overflow Badge](https://img.shields.io/badge/Stack%20Overflow-F58025?logo=stackoverflow&logoColor=fff&style=flat)](https://stackoverflow.com/users/12299287/cryptocode)  """)
 upload, analysis, data = st.tabs(['Pose Estimation', 'Angle', 'Velocity'])
 color_discrete_map={
 'Right Shoulder': '#ff8000',
