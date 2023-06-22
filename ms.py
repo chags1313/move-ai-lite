@@ -568,8 +568,8 @@ if video_file is not None:
                                                  slide = int(st.session_state['slide_value'] * fps), 
                                                  color_discrete_map=color_discrete_map,
                                                 height = 500)
-        st.plotly_chart(joint_line_plot, use_container_width=True, config= {'displaylogo': False})
         st.download_button("Download Joint Angles", df_joint_angles.to_csv(), use_container_width=True)
+        st.plotly_chart(joint_line_plot, use_container_width=True, config= {'displaylogo': False})
         le, ri = st.columns(2)
         for joint in jnt:
             if joint.startswith("Left"):
