@@ -9,6 +9,8 @@ import time
 from io import BytesIO
 import os
 import av
+from streamlit_modal import Modal
+
 
 #######################################
 ######################################
@@ -418,7 +420,11 @@ st.markdown(
 """
 Human movement insights powered by computer vision and a single camera
 """)
-l.button("Log in 👤")
+sett = l.button("Log in 👤")
+if sett:
+  modal = Modal(key="Demo Key",title="test")
+  with modal.container():
+      st.markdown('testtesttesttesttesttesttesttest')
 jnt_container = st.empty()
 upload, analysis, data = st.tabs(['File', 'Analysis', 'Data'])
 color_discrete_map={
