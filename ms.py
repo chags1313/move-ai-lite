@@ -9,7 +9,7 @@ import time
 from io import BytesIO
 import os
 import av
-from streamlit_modal import Modal
+import webbrowser
 
 
 #######################################
@@ -422,7 +422,7 @@ Human movement insights powered by computer vision and a single camera
 """)
 sett = l.button("❔ Help")
 if sett:
-  modal = Modal(key="Demo Key",title="Help")
+  webbrowser.open('https://github.com/chags1313/MoveSense')
   with modal.container():
     """
     - Upload a video to get started
