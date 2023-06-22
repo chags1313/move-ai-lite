@@ -421,7 +421,6 @@ st.markdown(
 Human movement insights powered by computer vision and a single camera
 """)
 sett = l.button("Log in 👤")
-jnt_container = st.empty()
 upload, analysis, data = st.tabs(['File', 'Analysis', 'Data'])
 color_discrete_map={
 'Right Shoulder': '#ff8000',
@@ -488,6 +487,10 @@ with upload:
           textscale = st.number_input("Angle Text Scale", min_value = 0.0, max_value = 5.0, value = 1.0, step = 0.1, help = 'Scale of text in reference to the depth of the marker coordinates.')
           textsize = st.number_input("Angle Text Thickness", min_value = 0, max_value = 20, value = 2, help = 'Thickness of the text appended to each image representing the angle of each joint in degrees.')
           angletextcolor = st.selectbox("Angle Text Color", options = ['White', 'Grey', 'Black'], help = 'Color of the text appended to show joint angle values.')
+          st.write("___")
+          st.write("Plot Settings")
+          options = color_discrete_map.keys()
+          jnt = st.multiselect('Joint', key = 'jnt', options = options, default = options, help = 'Select the joints to view in the plots')
 
     htm = """
     <style>
@@ -560,8 +563,6 @@ if video_file is not None:
         step = st.session_state.df_pose['Frame'].iloc[1] - st.session_state.df_pose['Frame'].iloc[0]
         max_step = st.session_state.df_pose['Frame'].max()
         df_joint_angles['time'] = df_joint_angles.index
-        options = [col for col in df_joint_angles.drop(['time'], axis = 1).columns]
-        jnt = jnt_container.multiselect('Joint', key = 'jnt', options = options, default = options, label_visibility='collapsed', help = 'Joints to plot')
         # Create joint line plot
         joint_line_plot = create_joint_line_plot(df_joint_angles, jnt, 
                                                  slide = int(st.session_state['slide_value'] * fps), 
