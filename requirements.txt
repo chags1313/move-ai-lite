@@ -4,6 +4,4 @@ opencv-python-headless
 plotly
 pandas==1.4.1
 numpy
-firebase-admin
 av
-streamlit-modal
