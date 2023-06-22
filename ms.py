@@ -563,7 +563,7 @@ if video_file is not None:
         # Calculate joint angles
         with upload:
           container_left, container_right = st.columns(2)
-          st.video(st.session_state.key_arr)
+          container_left.video(st.session_state.key_arr)
         df_joint_angles = calculate_joint_angles(st.session_state.df_pose)
         # Perform exponential weighted mean on joint angles to smooth data
         df_joint_angles = df_joint_angles.ewm(com=1.5, adjust = False).mean()
