@@ -421,10 +421,6 @@ st.markdown(
 Human movement insights powered by computer vision and a single camera
 """)
 sett = l.button("Log in 👤")
-if sett:
-  modal = Modal(key="Demo Key",title="test")
-  with modal.container():
-      st.markdown('testtesttesttesttesttesttesttest')
 jnt_container = st.empty()
 upload, analysis, data = st.tabs(['File', 'Analysis', 'Data'])
 color_discrete_map={
@@ -448,50 +444,52 @@ with upload:
     detectconfidence = r.number_input("Detection Confidence", value = 0.85, step = 0.1, help = 'The minimum confidence level to be used for detecting joints. This is on a scale of 0 to 1. 0 represents low confidence and 1 represents high confidence.')
     video_file = st.file_uploader("Upload a video", 
                             help = "Upload a video to markerless motion capture data.")
-    with st.expander("Advanced Motion Capture Settings"):
-        l1, r1 = st.columns(2)
-        fx = 640
-        fy = 480
-        l1.write("___")
-        r1.write("___")
-        l1.write("Left Joint Colors")
-        r1.write("Right Joint Colors")
-        l1.write("___")
-        r1.write("___")
-        colorshldl = l1.color_picker("Left Shoulder", value = color_discrete_map['Left Shoulder'])
-        colorshldr = r1.color_picker("Right Shoulder", value = color_discrete_map['Right Shoulder'])
-        colorelbl = l1.color_picker("Left Elbow", value = color_discrete_map['Left Elbow'])
-        colorelbr = r1.color_picker("Right Elbow", value = color_discrete_map['Right Elbow'])
-        colorwrsl = l1.color_picker("Left Wrist", value = color_discrete_map['Left Wrist'])
-        colorwrsr = r1.color_picker("Right Wrist", value = color_discrete_map['Right Wrist'])
-        colorhipl = l1.color_picker("Left Hip", value = color_discrete_map['Left Hip'])
-        colorhipr = r1.color_picker("Right Hip", value = color_discrete_map['Right Hip'])
-        colorknl = l1.color_picker("Left Knee", value = color_discrete_map['Left Knee'])
-        colorknr = r1.color_picker("Right Knee", value = color_discrete_map['Right Knee'])
-        colorankl = l1.color_picker("Left Ankle", value = color_discrete_map['Left Ankle'])
-        colorankr = r1.color_picker("Right Ankle", value = color_discrete_map['Right Ankle'])
-        color_discrete_map={
-        'Right Shoulder': colorshldr,
-        'Right Elbow': colorelbr, 
-        'Right Wrist': colorwrsr, 
-        'Left Shoulder': colorshldl,
-        'Left Elbow': colorelbl, 
-        'Left Wrist':colorwrsl,
-        'Right Hip': colorhipr,
-        'Right Knee': colorknr, 
-        'Right Ankle': colorankr,
-        'Left Hip': colorhipl,
-        'Left Knee': colorknl, 
-        'Left Ankle': colorankl
-        }
-        st.write("___")
-        st.write("Marker and Text Settings")
-        st.write("___")
-        markersize = st.number_input("Marker Sizes", min_value = 0, max_value = 20, value = 5, help = 'Size of the marker in pixels that will be displayed on each joint.')
-        linesize = st.number_input("Line Sizes", min_value = 0, max_value = 20, value = 2, help = 'Size of the line in pixels that will be displayed on each joint connection')
-        textscale = st.number_input("Angle Text Scale", min_value = 0.0, max_value = 5.0, value = 1.0, step = 0.1, help = 'Scale of text in reference to the depth of the marker coordinates.')
-        textsize = st.number_input("Angle Text Thickness", min_value = 0, max_value = 20, value = 2, help = 'Thickness of the text appended to each image representing the angle of each joint in degrees.')
-        angletextcolor = st.selectbox("Angle Text Color", options = ['White', 'Grey', 'Black'], help = 'Color of the text appended to show joint angle values.')
+    if sett:
+        modal = Modal(key="Demo Key",title="test")
+        with modal.container():
+          l1, r1 = st.columns(2)
+          fx = 640
+          fy = 480
+          l1.write("___")
+          r1.write("___")
+          l1.write("Left Joint Colors")
+          r1.write("Right Joint Colors")
+          l1.write("___")
+          r1.write("___")
+          colorshldl = l1.color_picker("Left Shoulder", value = color_discrete_map['Left Shoulder'])
+          colorshldr = r1.color_picker("Right Shoulder", value = color_discrete_map['Right Shoulder'])
+          colorelbl = l1.color_picker("Left Elbow", value = color_discrete_map['Left Elbow'])
+          colorelbr = r1.color_picker("Right Elbow", value = color_discrete_map['Right Elbow'])
+          colorwrsl = l1.color_picker("Left Wrist", value = color_discrete_map['Left Wrist'])
+          colorwrsr = r1.color_picker("Right Wrist", value = color_discrete_map['Right Wrist'])
+          colorhipl = l1.color_picker("Left Hip", value = color_discrete_map['Left Hip'])
+          colorhipr = r1.color_picker("Right Hip", value = color_discrete_map['Right Hip'])
+          colorknl = l1.color_picker("Left Knee", value = color_discrete_map['Left Knee'])
+          colorknr = r1.color_picker("Right Knee", value = color_discrete_map['Right Knee'])
+          colorankl = l1.color_picker("Left Ankle", value = color_discrete_map['Left Ankle'])
+          colorankr = r1.color_picker("Right Ankle", value = color_discrete_map['Right Ankle'])
+          color_discrete_map={
+          'Right Shoulder': colorshldr,
+          'Right Elbow': colorelbr, 
+          'Right Wrist': colorwrsr, 
+          'Left Shoulder': colorshldl,
+          'Left Elbow': colorelbl, 
+          'Left Wrist':colorwrsl,
+          'Right Hip': colorhipr,
+          'Right Knee': colorknr, 
+          'Right Ankle': colorankr,
+          'Left Hip': colorhipl,
+          'Left Knee': colorknl, 
+          'Left Ankle': colorankl
+          }
+          st.write("___")
+          st.write("Marker and Text Settings")
+          st.write("___")
+          markersize = st.number_input("Marker Sizes", min_value = 0, max_value = 20, value = 5, help = 'Size of the marker in pixels that will be displayed on each joint.')
+          linesize = st.number_input("Line Sizes", min_value = 0, max_value = 20, value = 2, help = 'Size of the line in pixels that will be displayed on each joint connection')
+          textscale = st.number_input("Angle Text Scale", min_value = 0.0, max_value = 5.0, value = 1.0, step = 0.1, help = 'Scale of text in reference to the depth of the marker coordinates.')
+          textsize = st.number_input("Angle Text Thickness", min_value = 0, max_value = 20, value = 2, help = 'Thickness of the text appended to each image representing the angle of each joint in degrees.')
+          angletextcolor = st.selectbox("Angle Text Color", options = ['White', 'Grey', 'Black'], help = 'Color of the text appended to show joint angle values.')
 
     htm = """
     <style>
