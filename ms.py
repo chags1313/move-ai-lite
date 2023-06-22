@@ -420,7 +420,17 @@ st.markdown(
 """
 Human movement insights powered by computer vision and a single camera
 """)
-sett = l.button("Log in 👤")
+sett = l.button("❔ Help")
+if sett:
+  modal = Modal(key="Demo Key",title="Help")
+  with modal:
+    """
+    - Upload a video to get started
+    - Use the advanced motion capture settings to customize analyses
+    - Visualize motion capture predictions appended to the video with the home tab
+    - Visualize joint angles over time with the Joint Angles tab
+    - Visualize joint angle velocity over time with the Joint Velocities tab
+    """
 upload, analysis, data = st.tabs(['File', 'Analysis', 'Data'])
 color_discrete_map={
 'Right Shoulder': '#ff8000',
