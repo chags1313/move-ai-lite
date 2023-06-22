@@ -447,7 +447,8 @@ color_discrete_map={
 'Left Ankle': '#ccccff'
 }
 with upload:
-    video_file = st.file_uploader("Upload a video", 
+    container_left, container_right = st.columns(2)
+    video_file = container_left.file_uploader("Upload a video", 
                             help = "Upload a video to markerless motion capture data.")
     with st.expander("Advanced Motion Capture Settings"):
           l, r = st.columns(2)
@@ -578,7 +579,12 @@ if video_file is not None:
                                                  slide = int(st.session_state['slide_value'] * fps), 
                                                  color_discrete_map=color_discrete_map,
                                                 height = 500)
+        joint_line_plot_ms = create_joint_line_plot(df_joint_angles, jnt, 
+                                                 slide = int(st.session_state['slide_value'] * fps), 
+                                                 color_discrete_map=color_discrete_map,
+                                                height = 200)
         st.download_button("Download Joint Angles", df_joint_angles.to_csv(), use_container_width=True)
+        container_right.plotly_chart(joint_line_plot_ms, use_container_width=True, config= {'displaylogo': False})
         st.plotly_chart(joint_line_plot, use_container_width=True, config= {'displaylogo': False})
         le, ri = st.columns(2)
         for joint in jnt:
@@ -653,7 +659,14 @@ if video_file is not None:
                                                          slide = int(st.session_state['slide_value'] * fps), 
                                                          color_discrete_map=color_discrete_map,
                                                         height = 500)
+        joint_velocity_plot_ms = create_joint_velocity_plot(df_joint_angles, 
+                                                         jnt, 
+                                                         fps,
+                                                         slide = int(st.session_state['slide_value'] * fps), 
+                                                         color_discrete_map=color_discrete_map,
+                                                        height = 200)
         st.plotly_chart(joint_velocity_plot, use_container_width=True, config= {'displaylogo': False})
+        container_right.plotly_chart(joint_velocity_plot_ms, use_container_width=True, config= {'displaylogo': False})
         le, ri = st.columns(2)
         for joint in jnt:
             if joint.startswith("Left"):
