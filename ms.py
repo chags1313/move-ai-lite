@@ -431,7 +431,7 @@ if sett:
     - Visualize joint angles over time with the Joint Angles tab
     - Visualize joint angle velocity over time with the Joint Velocities tab
     """
-upload, analysis, data = st.tabs(['File', 'Analysis', 'Data'])
+upload, analysis, data = st.tabs(['Pose Estimation', 'Angle', 'Velocity'])
 color_discrete_map={
 'Right Shoulder': '#ff8000',
 'Right Elbow': '#ffb266', 
